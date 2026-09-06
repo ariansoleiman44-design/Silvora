@@ -17,19 +17,83 @@
  */
 import { writeFileSync, mkdirSync } from "node:fs";
 import { copy as copyEn } from "../data/copy.ts";
-import { copyAr } from "../data/ar/copy.ar.ts";
 import { products as productsEn } from "../data/products.ts";
-import { productsAr } from "../data/ar/products.ar.ts";
 import { faqs as faqsEn, faqCategoryLabels } from "../data/faqs.ts";
-import { faqsAr } from "../data/ar/faqs.ar.ts";
 import { processSteps as processEn } from "../data/process.ts";
-import { processStepsAr } from "../data/ar/process.ar.ts";
 import { comparisonColumns, comparisonRows } from "../data/comparison.ts";
-import { comparisonAr } from "../data/ar/comparison.ar.ts";
 import { mainNav, footerNav, legalNav } from "../data/navigation.ts";
+import { formatLabels, applicationLabels, orderTypeLabels, availabilityLabels } from "../data/products.ts";
+import { locales, activeLocales } from "../data/locales.ts";
+
+import { copyAr } from "../data/ar/copy.ar.ts";
+import { productsAr } from "../data/ar/products.ar.ts";
+import { faqsAr } from "../data/ar/faqs.ar.ts";
+import { processStepsAr } from "../data/ar/process.ar.ts";
+import { comparisonAr } from "../data/ar/comparison.ar.ts";
 import { navigationAr } from "../data/ar/navigation.ar.ts";
 import { labelsAr } from "../data/ar/labels.ar.ts";
-import { formatLabels, applicationLabels, orderTypeLabels, availabilityLabels } from "../data/products.ts";
+
+import { copyCkb } from "../data/ckb/copy.ckb.ts";
+import { productsCkb } from "../data/ckb/products.ckb.ts";
+import { faqsCkb } from "../data/ckb/faqs.ckb.ts";
+import { processStepsCkb } from "../data/ckb/process.ckb.ts";
+import { comparisonCkb } from "../data/ckb/comparison.ckb.ts";
+import { navigationCkb } from "../data/ckb/navigation.ckb.ts";
+import { labelsCkb } from "../data/ckb/labels.ckb.ts";
+
+import { copyKmr } from "../data/kmr/copy.kmr.ts";
+import { productsKmr } from "../data/kmr/products.kmr.ts";
+import { faqsKmr } from "../data/kmr/faqs.kmr.ts";
+import { processStepsKmr } from "../data/kmr/process.kmr.ts";
+import { comparisonKmr } from "../data/kmr/comparison.kmr.ts";
+import { navigationKmr } from "../data/kmr/navigation.kmr.ts";
+import { labelsKmr } from "../data/kmr/labels.kmr.ts";
+
+/** Every translated locale, with the guidance a reviewer of it needs. */
+const TARGETS = [
+  {
+    code: "ar",
+    file: "docs/AR-REVIEW.md",
+    copy: copyAr, products: productsAr, faqs: faqsAr, process: processStepsAr,
+    comparison: comparisonAr, nav: navigationAr, labels: labelsAr,
+    notes: [
+      "- **Agricultural vocabulary.** سيلاج، بالة، الفرم، الكبس، المادة الجافة —",
+      "  regional Iraqi usage may differ from dictionary MSA. If a farmer in Erbil",
+      "  would say it differently, that wording wins.",
+      "- **Register.** The English is deliberately plain. Arabic marketing prose",
+      "  tends to inflate; it should not here.",
+    ],
+  },
+  {
+    code: "ckb",
+    file: "docs/CKB-REVIEW.md",
+    copy: copyCkb, products: productsCkb, faqs: faqsCkb, process: processStepsCkb,
+    comparison: comparisonCkb, nav: navigationCkb, labels: labelsCkb,
+    notes: [
+      "- **Agricultural vocabulary.** سایلێج، بالە، وردکردن، پەستان، ماددەی وشک —",
+      "  check these against how the trade actually speaks in Erbil and",
+      "  Sulaymaniyah, not against a dictionary.",
+      "- **گەنمەشامی vs زوڕەت** for maize: both are used regionally. The site uses",
+      "  گەنمەشامی throughout; if the trade says otherwise, change it everywhere.",
+    ],
+  },
+  {
+    code: "kmr",
+    file: "docs/KMR-REVIEW.md",
+    copy: copyKmr, products: productsKmr, faqs: faqsKmr, process: processStepsKmr,
+    comparison: comparisonKmr, nav: navigationKmr, labels: labelsKmr,
+    notes: [
+      "- **⚠ This locale needs REWRITING in places, not just proofreading.**",
+      "  Badini Kurmanji in the Arabic script is far less standardised than",
+      "  Sorani: orthography varies between Duhok, Zakho and Amedi, ezafe and",
+      "  case marking are written inconsistently, and there is little published",
+      "  agricultural writing to follow. Treat every sentence as a proposal.",
+      "- **It is not linked from the site** — `kmr` is absent from",
+      "  `activeLocales` in data/locales.ts. Add it only after this review.",
+      "- **Ezafe and case endings** (ـێ / ـا / ـێن) are the most likely errors.",
+    ],
+  },
+];
 
 interface Row {
   path: string;
@@ -37,8 +101,8 @@ interface Row {
   ar: string;
 }
 
-const rows: Row[] = [];
-const untranslated: Row[] = [];
+let rows: Row[] = [];
+let untranslated: Row[] = [];
 
 /** Strings that are the same in both languages on purpose. */
 const INTENTIONAL = new Set(["SILVORA", "WhatsApp", "404", "%", "pH", "NDF", "ADF"]);
@@ -79,12 +143,18 @@ function walk(prefix: string, en: unknown, ar: unknown) {
   }
 }
 
+function collect(target: (typeof TARGETS)[number]) {
+  rows = [];
+  untranslated = [];
+  const { copy: copyT, products: productsT, faqs: faqsT, process: processT,
+          comparison: comparisonT, nav: navT, labels: labelsT } = target;
+
 /* ---------------------------------------------------------------- copy */
-walk("copy", copyEn, copyAr);
+walk("copy", copyEn, copyT);
 
 /* ------------------------------------------------------------ products */
 for (const p of productsEn) {
-  const t = productsAr[p.slug];
+  const t = productsT[p.slug];
   const base = `products.${p.slug}`;
   add(`${base}.name`, p.name, t?.name);
   add(`${base}.shortName`, p.shortName, t?.shortName);
@@ -111,104 +181,120 @@ for (const p of productsEn) {
 
 /* ---------------------------------------------------------------- faqs */
 faqsEn.forEach((f, i) => {
-  add(`faqs[${i}].question`, f.question, faqsAr[i]?.question);
-  add(`faqs[${i}].answer`, f.answer, faqsAr[i]?.answer);
+  add(`faqs[${i}].question`, f.question, faqsT[i]?.question);
+  add(`faqs[${i}].answer`, f.answer, faqsT[i]?.answer);
 });
 
 /* ------------------------------------------------------------- process */
 processEn.forEach((s, i) => {
-  add(`process[${i}].title`, s.title, processStepsAr[i]?.title);
-  add(`process[${i}].summary`, s.summary, processStepsAr[i]?.summary);
-  add(`process[${i}].detail`, s.detail, processStepsAr[i]?.detail);
+  add(`process[${i}].title`, s.title, processT[i]?.title);
+  add(`process[${i}].summary`, s.summary, processT[i]?.summary);
+  add(`process[${i}].detail`, s.detail, processT[i]?.detail);
 });
 
 /* ---------------------------------------------------------- comparison */
-comparisonColumns.forEach((c, i) => add(`comparison.columns[${i}]`, c.label, comparisonAr.columns[i]?.label));
+comparisonColumns.forEach((c, i) => add(`comparison.columns[${i}]`, c.label, comparisonT.columns[i]?.label));
 comparisonRows.forEach((r, i) => {
-  add(`comparison.rows[${i}].label`, r.label, comparisonAr.rows[i]?.label);
+  add(`comparison.rows[${i}].label`, r.label, comparisonT.rows[i]?.label);
   for (const key of Object.keys(r.values)) {
     add(`comparison.rows[${i}].${key}`, r.values[key as keyof typeof r.values],
-        comparisonAr.rows[i]?.values[key as keyof typeof r.values]);
+        comparisonT.rows[i]?.values[key as keyof typeof r.values]);
   }
 });
 
 /* ---------------------------------------------------------- navigation */
 mainNav.forEach((n, i) => {
-  add(`nav.main[${i}].label`, n.label, navigationAr.main[i]?.label);
-  add(`nav.main[${i}].hint`, n.hint, navigationAr.main[i]?.hint);
+  add(`nav.main[${i}].label`, n.label, navT.main[i]?.label);
+  add(`nav.main[${i}].hint`, n.hint, navT.main[i]?.hint);
 });
 footerNav.forEach((g, i) => {
-  add(`nav.footer[${i}].title`, g.title, navigationAr.footer[i]?.title);
-  g.links.forEach((l, j) => add(`nav.footer[${i}].links[${j}]`, l.label, navigationAr.footer[i]?.links[j]?.label));
+  add(`nav.footer[${i}].title`, g.title, navT.footer[i]?.title);
+  g.links.forEach((l, j) => add(`nav.footer[${i}].links[${j}]`, l.label, navT.footer[i]?.links[j]?.label));
 });
-legalNav.forEach((n, i) => add(`nav.legal[${i}]`, n.label, navigationAr.legal[i]?.label));
+legalNav.forEach((n, i) => add(`nav.legal[${i}]`, n.label, navT.legal[i]?.label));
 
 /* -------------------------------------------------------------- labels */
 for (const [group, en, ar] of [
-  ["format", formatLabels, labelsAr.format],
-  ["application", applicationLabels, labelsAr.application],
-  ["orderType", orderTypeLabels, labelsAr.orderType],
-  ["availability", availabilityLabels, labelsAr.availability],
-  ["faqCategory", faqCategoryLabels, labelsAr.faqCategory],
+  ["format", formatLabels, labelsT.format],
+  ["application", applicationLabels, labelsT.application],
+  ["orderType", orderTypeLabels, labelsT.orderType],
+  ["availability", availabilityLabels, labelsT.availability],
+  ["faqCategory", faqCategoryLabels, labelsT.faqCategory],
 ] as const) {
   for (const key of Object.keys(en)) {
     add(`labels.${group}.${key}`, (en as Record<string,string>)[key], (ar as Record<string,string>)[key]);
   }
 }
 
+}
+
 /* -------------------------------------------------------------- output */
 const esc = (s: string) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
-const groups = new Map<string, Row[]>();
-for (const r of rows) {
-  const g = r.path.split(/[.[]/)[0]!;
-  if (!groups.has(g)) groups.set(g, []);
-  groups.get(g)!.push(r);
-}
 
-const out: string[] = [
-  "# SILVORA — Arabic translation review",
-  "",
-  `${rows.length} strings. Generated by \`npm run i18n:review\` — do not edit this file;`,
-  "edit `data/ar/*.ts` and regenerate.",
-  "",
-  "## How to review",
-  "",
-  "Read the Arabic against the English. Where a correction is needed, note the",
-  "`path` — it maps directly to the key in `data/ar/`.",
-  "",
-  "Worth extra attention:",
-  "",
-  "- **Agricultural vocabulary.** سيلاج، بالة، الفرم، الكبس، المادة الجافة —",
-  "  regional Iraqi usage may differ from dictionary MSA. If a farmer in Erbil",
-  "  would say it differently, that wording wins.",
-  "- **Register.** The English is deliberately plain and unshowy. Arabic",
-  "  marketing prose tends to inflate; it should not here.",
-  "- **Numerals.** Western digits (0–9) throughout, by design.",
-  "- **SILVORA** stays in Latin script inside Arabic sentences.",
-  "",
-];
-
-if (untranslated.length) {
-  out.push(`## ⚠ Untranslated (${untranslated.length})`, "",
-    "Arabic identical to English — either a missing translation or an",
-    "intentional loanword.", "",
-    "| Path | Text |", "|---|---|",
-    ...untranslated.map((r) => `| \`${r.path}\` | ${esc(r.en)} |`), "");
-} else {
-  out.push("## ✓ No untranslated strings", "");
-}
-
-for (const [group, list] of groups) {
-  out.push(`## ${group} (${list.length})`, "", "| Path | English | العربية |", "|---|---|---|",
-    ...list.map((r) => `| \`${r.path}\` | ${esc(r.en)} | ${esc(r.ar || "—")} |`), "");
-}
-
+console.log("\nSILVORA — TRANSLATION REVIEW SHEETS\n");
 mkdirSync("docs", { recursive: true });
-writeFileSync("docs/AR-REVIEW.md", out.join("\n"));
 
-console.log(`\nSILVORA — ARABIC REVIEW SHEET\n`);
-console.log(`  ${rows.length} strings written to docs/AR-REVIEW.md`);
-console.log(`  ${untranslated.length} identical to English${untranslated.length ? " (listed at the top of the file)" : ""}\n`);
-untranslated.slice(0, 12).forEach((r) => console.log(`    ! ${r.path}: ${r.en.slice(0, 60)}`));
-if (untranslated.length > 12) console.log(`    … and ${untranslated.length - 12} more`);
+let totalUntranslated = 0;
+
+for (const target of TARGETS) {
+  collect(target);
+  const meta = locales[target.code as keyof typeof locales];
+  const live = activeLocales.includes(target.code as never);
+
+  const groups = new Map<string, Row[]>();
+  for (const r of rows) {
+    const g = r.path.split(/[.[]/)[0]!;
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g)!.push(r);
+  }
+
+  const out: string[] = [
+    `# SILVORA — ${meta.label} translation review`,
+    "",
+    `${rows.length} strings. Generated by \`npm run i18n:review\` — do not edit this`,
+    "file; edit the locale's files under `data/` and regenerate.",
+    "",
+    live
+      ? `**Status: live.** This locale is in \`activeLocales\` and is served at /${target.code}/.`
+      : `**Status: NOT live.** This locale is absent from \`activeLocales\` in data/locales.ts, so nothing links to it. Add it there once this review is done.`,
+    "",
+    "## How to review",
+    "",
+    "Read the translation against the English. Where a correction is needed,",
+    "note the `path` — it maps directly to the key in the locale's data files.",
+    "",
+    "Worth extra attention:",
+    "",
+    ...target.notes,
+    "- **Numerals.** Western digits (0–9) throughout, by design.",
+    "- **SILVORA** stays in Latin script inside the translated text.",
+    "",
+  ];
+
+  if (untranslated.length) {
+    totalUntranslated += untranslated.length;
+    out.push(`## ⚠ Untranslated (${untranslated.length})`, "",
+      "Identical to the English — either a missing translation or an",
+      "intentional loanword.", "",
+      "| Path | Text |", "|---|---|",
+      ...untranslated.map((r) => `| \`${r.path}\` | ${esc(r.en)} |`), "");
+  } else {
+    out.push("## ✓ No untranslated strings", "");
+  }
+
+  for (const [group, list] of groups) {
+    out.push(`## ${group} (${list.length})`, "", `| Path | English | ${meta.nativeLabel} |`, "|---|---|---|",
+      ...list.map((r) => `| \`${r.path}\` | ${esc(r.en)} | ${esc(r.ar || "—")} |`), "");
+  }
+
+  writeFileSync(target.file, out.join("\n"));
+  console.log(
+    `  ${meta.label.padEnd(20)} ${String(rows.length).padStart(5)} strings  ` +
+      `${untranslated.length} identical  ${live ? "live" : "NOT LIVE"}  → ${target.file}`,
+  );
+}
+
 console.log("");
+if (totalUntranslated) {
+  console.log(`  ${totalUntranslated} string(s) identical to English — listed at the top of each file.\n`);
+}

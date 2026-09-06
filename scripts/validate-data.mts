@@ -18,10 +18,16 @@ import { products, formatLabels } from "../data/products.ts";
 import { media } from "../data/media.ts";
 import { caseStudies } from "../data/case-studies.ts";
 import { faqs } from "../data/faqs.ts";
+import { processSteps } from "../data/process.ts";
 import { productsAr } from "../data/ar/products.ar.ts";
 import { faqsAr } from "../data/ar/faqs.ar.ts";
 import { processStepsAr } from "../data/ar/process.ar.ts";
-import { processSteps } from "../data/process.ts";
+import { productsCkb } from "../data/ckb/products.ckb.ts";
+import { faqsCkb } from "../data/ckb/faqs.ckb.ts";
+import { processStepsCkb } from "../data/ckb/process.ckb.ts";
+import { productsKmr } from "../data/kmr/products.kmr.ts";
+import { faqsKmr } from "../data/kmr/faqs.kmr.ts";
+import { processStepsKmr } from "../data/kmr/process.kmr.ts";
 
 interface Finding {
   level: "error" | "warn";
@@ -242,39 +248,53 @@ faqs.forEach((f, i) => {
 /* Translations                                                        */
 /* ------------------------------------------------------------------ */
 
-// The Arabic UI copy is type-checked against `Copy`, so a missing key is
-// already a compile error. What TypeScript cannot check is the product
-// overlay (keyed by slug) and the parallel arrays.
+// UI copy is type-checked against `Copy`, so a missing key is already a
+// compile error. What TypeScript cannot check is the product overlay
+// (keyed by slug) and the parallel arrays, which must line up exactly.
 
-for (const p of products) {
-  if (!productsAr[p.slug]) {
-    error(`ar/products.ar.ts`, `no Arabic translation for product "${p.slug}"`);
+const TRANSLATIONS = [
+  { code: "ar", dir: "ar", products: productsAr, faqs: faqsAr, process: processStepsAr },
+  { code: "ckb", dir: "ckb", products: productsCkb, faqs: faqsCkb, process: processStepsCkb },
+  { code: "kmr", dir: "kmr", products: productsKmr, faqs: faqsKmr, process: processStepsKmr },
+];
+
+for (const t of TRANSLATIONS) {
+  const where = `${t.dir}/products.${t.code}.ts`;
+
+  for (const p of products) {
+    if (!t.products[p.slug]) {
+      error(where, `no ${t.code} translation for product "${p.slug}"`);
+    }
   }
+  for (const slug of Object.keys(t.products)) {
+    if (!slugs.has(slug)) {
+      error(where, `translation for unknown product "${slug}" — a renamed or deleted slug?`);
+    }
+  }
+
+  const faqWhere = `${t.dir}/faqs.${t.code}.ts`;
+  if (t.faqs.length !== faqs.length) {
+    error(faqWhere, `${t.faqs.length} ${t.code} FAQs vs ${faqs.length} English — the arrays must match one-for-one`);
+  }
+  t.faqs.forEach((f, i) => {
+    if (faqs[i] && f.category !== faqs[i]!.category) {
+      error(faqWhere, `faq[${i}] category "${f.category}" does not match English "${faqs[i]!.category}"`);
+    }
+  });
+
+  const stepWhere = `${t.dir}/process.${t.code}.ts`;
+  if (t.process.length !== processSteps.length) {
+    error(stepWhere, `${t.process.length} ${t.code} steps vs ${processSteps.length} English`);
+  }
+  t.process.forEach((step, i) => {
+    if (processSteps[i] && step.index !== processSteps[i]!.index) {
+      error(stepWhere, `step[${i}] index ${step.index} does not match English ${processSteps[i]!.index}`);
+    }
+    if (processSteps[i] && step.image !== processSteps[i]!.image) {
+      error(stepWhere, `step[${i}] image "${step.image}" does not match English "${processSteps[i]!.image}"`);
+    }
+  });
 }
-for (const slug of Object.keys(productsAr)) {
-  if (!slugs.has(slug)) {
-    error(`ar/products.ar.ts`, `translation for unknown product "${slug}" — a renamed or deleted slug?`);
-  }
-}
-if (faqsAr.length !== faqs.length) {
-  error("ar/faqs.ar.ts", `${faqsAr.length} Arabic FAQs vs ${faqs.length} English — the arrays must match one-for-one`);
-}
-faqsAr.forEach((f, i) => {
-  if (faqs[i] && f.category !== faqs[i]!.category) {
-    error("ar/faqs.ar.ts", `faq[${i}] category "${f.category}" does not match English "${faqs[i]!.category}"`);
-  }
-});
-if (processStepsAr.length !== processSteps.length) {
-  error("ar/process.ar.ts", `${processStepsAr.length} Arabic steps vs ${processSteps.length} English`);
-}
-processStepsAr.forEach((s, i) => {
-  if (processSteps[i] && s.index !== processSteps[i]!.index) {
-    error("ar/process.ar.ts", `step[${i}] index ${s.index} does not match English ${processSteps[i]!.index}`);
-  }
-  if (processSteps[i] && s.image !== processSteps[i]!.image) {
-    error("ar/process.ar.ts", `step[${i}] image "${s.image}" does not match English "${processSteps[i]!.image}"`);
-  }
-});
 
 /* ------------------------------------------------------------------ */
 /* Report                                                              */
@@ -285,7 +305,7 @@ const warnings = findings.filter((f) => f.level === "warn");
 
 console.log("\nSILVORA — PRODUCT DATA VALIDATION\n");
 console.log(`  ${products.length} products · ${mediaKeys.size} media keys · ${faqs.length} FAQs · ${caseStudies.length} case studies`);
-console.log(`  translations: ar (${Object.keys(productsAr).length} products, ${faqsAr.length} FAQs, ${processStepsAr.length} steps)\n`);
+console.log(`  translations: ${TRANSLATIONS.map((t) => t.code).join(', ')}\n`);
 
 if (errors.length) {
   console.log(`ERRORS (${errors.length})`);

@@ -9,7 +9,7 @@
  */
 
 // The canonical locale table lives in data/locales.ts (also import-free).
-export type LocaleCode = "en" | "ar" | "ku";
+export type LocaleCode = "en" | "ar" | "ckb" | "kmr";
 
 /**
  * How quote submissions are handled.
@@ -190,7 +190,7 @@ export const siteConfig = {
   /* ------------------------------------------------------- Language */
   defaultLanguage: "en" as LocaleCode,
   /** Languages the site is prepared for. See lib/i18n.ts. */
-  languages: ["en", "ar", "ku"] as LocaleCode[],
+  languages: ["en", "ar", "ckb", "kmr"] as LocaleCode[],
 
   /* ------------------------------------------------------------ SEO */
   seo: {

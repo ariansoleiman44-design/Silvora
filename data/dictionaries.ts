@@ -13,6 +13,22 @@ import { comparisonAr } from "@/data/ar/comparison.ar";
 import { navigationAr } from "@/data/ar/navigation.ar";
 import { labelsAr } from "@/data/ar/labels.ar";
 
+import { copyCkb } from "@/data/ckb/copy.ckb";
+import { productsCkb } from "@/data/ckb/products.ckb";
+import { faqsCkb } from "@/data/ckb/faqs.ckb";
+import { processStepsCkb } from "@/data/ckb/process.ckb";
+import { comparisonCkb } from "@/data/ckb/comparison.ckb";
+import { navigationCkb } from "@/data/ckb/navigation.ckb";
+import { labelsCkb } from "@/data/ckb/labels.ckb";
+
+import { copyKmr } from "@/data/kmr/copy.kmr";
+import { productsKmr } from "@/data/kmr/products.kmr";
+import { faqsKmr } from "@/data/kmr/faqs.kmr";
+import { processStepsKmr } from "@/data/kmr/process.kmr";
+import { comparisonKmr } from "@/data/kmr/comparison.kmr";
+import { navigationKmr } from "@/data/kmr/navigation.kmr";
+import { labelsKmr } from "@/data/kmr/labels.kmr";
+
 import { PRODUCT_SPEC_KEYS, type ProductTranslation } from "@/types/i18n";
 import type { Product, SpecItem } from "@/types/product";
 import type { LocaleCode } from "@/lib/i18n";
@@ -140,7 +156,34 @@ const ar: Dictionary = {
   labels: labelsAr,
 };
 
-const dictionaries: Record<string, Dictionary> = { en, ar };
+const ckb: Dictionary = {
+  locale: "ckb",
+  copy: copyCkb,
+  products: translateProducts(productsCkb),
+  faqs: faqsCkb,
+  processSteps: processStepsCkb,
+  comparison: comparisonCkb,
+  nav: navigationCkb,
+  labels: labelsCkb,
+};
+
+/**
+ * Badini. Present so the translation can be built and reviewed, but NOT
+ * in `activeLocales` — nothing links to it until a native speaker has
+ * been through docs/KMR-REVIEW.md. See data/kmr/copy.kmr.ts.
+ */
+const kmr: Dictionary = {
+  locale: "kmr",
+  copy: copyKmr,
+  products: translateProducts(productsKmr),
+  faqs: faqsKmr,
+  processSteps: processStepsKmr,
+  comparison: comparisonKmr,
+  nav: navigationKmr,
+  labels: labelsKmr,
+};
+
+const dictionaries: Record<string, Dictionary> = { en, ar, ckb, kmr };
 
 /** Resolve a locale's content. Unknown locales fall back to English. */
 export function getDictionaryFor(locale: LocaleCode): Dictionary {

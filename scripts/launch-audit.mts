@@ -233,14 +233,19 @@ ready(
 
 if (untranslated.length) {
   warning(
-    "Untranslated locales",
-    `${untranslated.map((l) => locales[l].label).join(", ")} appear in the switcher as unavailable. Translate or remove from siteConfig.languages.`,
+    "Locales shown as unavailable",
+    `${untranslated.map((l) => locales[l].label).join(", ")} ${untranslated.length === 1 ? "appears" : "appear"} in the switcher but ${untranslated.length === 1 ? "is" : "are"} not linked. That is correct while unreviewed.`,
   );
 }
 
 warning(
-  "Arabic review",
-  "the Arabic copy has not been reviewed by a native speaker. Run npm run i18n:review and have docs/AR-REVIEW.md checked before launch — agricultural terminology especially.",
+  "Translation review",
+  "no translated locale has been checked by a native speaker. Run npm run i18n:review and have docs/AR-REVIEW.md and docs/CKB-REVIEW.md read before launch — agricultural terminology especially.",
+);
+
+warning(
+  "Badini (kmr)",
+  "built but NOT enabled — Kurmanji in the Arabic script needs a native speaker to rewrite parts of it. See docs/KMR-REVIEW.md, then add \"kmr\" to activeLocales.",
 );
 
 /* ------------------------------------------------------------------ */

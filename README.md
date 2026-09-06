@@ -376,11 +376,13 @@ data files.
 
 ## 14. Languages
 
-English and Arabic are both live:
+Four locales, three of them live:
 
 ```
-/products        English   (default locale, no prefix — existing URLs unchanged)
+/products        English         (default, no prefix — existing URLs unchanged)
 /ar/products     العربية
+/ckb/products    کوردیی سۆرانی
+/kmr/products    کوردیا بادینی   — built, NOT enabled (see below)
 ```
 
 **How it works**
@@ -427,15 +429,22 @@ meaningless or broken in Arabic. No component names a typeface.
 **Reviewing a translation**
 
 ```bash
-npm run i18n:review     # → docs/AR-REVIEW.md
+npm run i18n:review     # → docs/AR-REVIEW.md, CKB-REVIEW.md, KMR-REVIEW.md
 ```
 
-Every string side by side with its English source and its `data/ar/`
-path. Also flags any Arabic identical to the English.
+One sheet per locale: every string beside its English source and its
+`data/` path, with per-language guidance at the top. Flags anything
+byte-identical to the English.
+
+**Badini is gated on purpose.** `kmr` is absent from `activeLocales`, so
+`/kmr/*` 404s and the switcher shows it as unavailable. Kurmanji in the
+Arabic script is not standardised enough to publish without a native
+speaker rewriting parts of it — see the header of `data/kmr/copy.kmr.ts`.
+Enabling it is one line, after `docs/KMR-REVIEW.md` is reviewed.
 
 **Adding a locale**
 
-1. `data/ku/` mirroring `data/ar/`
+1. `data/<code>/` mirroring `data/ar/`
 2. register it in `data/dictionaries.ts`
 3. add the code to `activeLocales` in `data/locales.ts`
 

@@ -405,53 +405,59 @@ Have a nutritionist check them for your market.
 
 ## 16. Languages
 
-**English and Arabic are both live.** English is served from the root
-(`/products`), Arabic from a prefix (`/ar/products`), through one set of
-route files under `app/[locale]` plus a middleware rewrite — so no
-existing English URL changed.
+| Locale | Path | Status |
+|---|---|---|
+| English | `/` | live (default, unprefixed) |
+| العربية | `/ar` | live — draft, needs native review |
+| کوردیی سۆرانی | `/ckb` | live — draft, needs native review |
+| کوردیا بادینی | `/kmr` | **built but NOT live** |
 
-What is in place:
+All four are complete translations of the same 1,142 strings: UI copy,
+9 products, 16 FAQs, the 8-step process, the comparison table,
+navigation, labels, per-page metadata and the whole RFQ wizard.
 
-- 1,142 translated strings: all UI copy, all 9 products, 16 FAQs, the
-  8-step process, the comparison table, navigation, labels, per-page
-  metadata and the whole RFQ wizard
-- RTL layout (logical properties throughout — no per-component work)
-- Arabic typography: **Amiri** for display, **IBM Plex Sans Arabic** for
-  text, swapped by a `[dir="rtl"]` block in `styles/globals.css`.
-  Uppercase, letter-spacing and italic are neutralised in Arabic, where
-  they are meaningless or actively broken
-- Western digits (0–9) in both languages — Iraqi commercial documents
-  use them, and a quantity read back over the phone must match the invoice
-- `hreflang` on every page and in the sitemap, so an Arabic-speaking
-  buyer is served the Arabic page from search
-- A language switcher that stays on the same page across languages
-- The buyer's copied / WhatsApp summary follows their language; the
-  internal sales email stays English so the team reads one language
+**Infrastructure** (shared by every locale): one route tree under
+`app/[locale]` plus a proxy rewrite, RTL layout, `hreflang` on every page
+and in the sitemap, a switcher that stays on the same page across
+languages, RTL-aware scroll maths, and Western digits everywhere.
 
-**Still to do: a native review.** The Arabic is written as final, but
-agricultural vocabulary is where regional Iraqi usage most often differs
-from dictionary MSA.
+Arabic-script typography: Amiri (display) + IBM Plex Sans Arabic (text),
+with `uppercase`, letter-spacing and `italic` neutralised — all three are
+meaningless or visibly broken in Arabic script.
+
+### Badini is deliberately gated
+
+`kmr` is absent from `activeLocales` in `data/locales.ts`, so `/kmr/*`
+returns 404 and the switcher lists it as unavailable. Nothing links to it.
+
+This is not an oversight. Badini Kurmanji written in the Arabic script is
+far less standardised than Sorani: orthography varies between Duhok,
+Zakho and Amedi, ezafe and case marking are written inconsistently in
+practice, and there is little published agricultural writing to follow.
+The translation was produced with materially lower confidence than the
+Arabic and Sorani, and it needs a Badini speaker to **rewrite** parts of
+it, not merely proofread.
+
+To enable it after review, add `"kmr"` to `activeLocales`. One line.
+
+### Reviewing
 
 ```bash
-npm run i18n:review    # → docs/AR-REVIEW.md
+npm run i18n:review
 ```
 
-That produces every string side by side with its English source and its
-`data/ar/` path, so a reviewer can work through it without opening the
-codebase. It also flags any Arabic that is byte-identical to the English
-(currently zero). Terms worth checking first: سيلاج، بالة، الفرم، الكبس،
-المادة الجافة، التخمّر، دفعة.
+Writes one sheet per locale — `docs/AR-REVIEW.md`, `docs/CKB-REVIEW.md`,
+`docs/KMR-REVIEW.md` — each listing every string beside its English
+source and its `data/` path, with per-language guidance at the top. It
+also flags any translation byte-identical to the English (currently zero
+in all three).
 
-**Kurdish (Sorani)** is declared in `siteConfig.languages` but not in
-`activeLocales`, so it shows in the switcher as unavailable rather than
-linking to a half-translated page. To add it: create `data/ku/`, mirror
-`data/ar/`, register it in `data/dictionaries.ts`, and add `"ku"` to
-`activeLocales` in `data/locales.ts`. Nothing else changes. It must be
-real Sorani, reviewed by a speaker.
+`npm run validate:data` checks that every locale's product overlay,
+FAQ array and process array line up with the English source.
 
 Legal pages (privacy / terms / cookies) are translated in their UI
-framing but their body text is still the English placeholder — they are
-being rewritten by a lawyer anyway (§2).
+framing, but their body text remains the English placeholder — a lawyer
+is rewriting it anyway (§2).
 
 ---
 
@@ -484,6 +490,9 @@ Verification:
 - [ ] Quote survives a refresh mid-flow; "clear request" empties it
 - [ ] Print the review step — one or two clean pages
 - [ ] `docs/AR-REVIEW.md` reviewed by a native Arabic speaker
-- [ ] Arabic pages checked at 390px — RTL layout, no clipped headlines
+- [ ] `docs/CKB-REVIEW.md` reviewed by a native Sorani speaker
+- [ ] `docs/KMR-REVIEW.md` reviewed (and partly rewritten) by a Badini speaker, before `kmr` is added to `activeLocales`
+- [ ] RTL pages checked at 390px — layout, no clipped headlines
+- [ ] Arabic-script fonts render Kurdish letters (ڕ ڵ ۆ ێ ژ چ پ گ) with no missing glyphs
 - [ ] 390px: complete an RFQ with the keyboard open; the sticky bar never
       covers an input
