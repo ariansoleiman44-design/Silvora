@@ -4,6 +4,7 @@ import Image from "next/image";
 import { m, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Button } from "@/components/ui/Button";
+import { HeroVideo } from "@/components/home/HeroVideo";
 import { media } from "@/data/media";
 import { useCopy } from "@/lib/locale-client";
 import { useIsDesktop } from "@/lib/hooks";
@@ -16,7 +17,7 @@ export function Hero() {
   const reduce = useReducedMotion();
   const isDesktop = useIsDesktop();
   const t = copy.hero;
-  const img = media.homeHero;
+  const img = media.homeHeroPoster;
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const imgY = useTransform(scrollYProgress, [0, 1], ["0%", isDesktop && !reduce ? "18%" : "0%"]);
@@ -29,7 +30,16 @@ export function Hero() {
       className="grain relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-ink text-cream"
       aria-labelledby="hero-heading"
     >
-      {/* Photography */}
+      {/*
+        The still is the LCP element and always renders. The video, when
+        it renders at all, fades in over it — see HeroVideo for who does
+        not get it.
+
+        The video sits OUTSIDE the animate-hero-zoom wrapper on purpose:
+        the footage already moves, and scaling a playing video would be
+        a pointless composite on every frame. Both layers still share
+        the parallax transform on the parent.
+      */}
       <m.div className="graded absolute inset-0" style={{ y: imgY }}>
         <div className="absolute inset-0 animate-hero-zoom">
           <Image
@@ -43,6 +53,7 @@ export function Hero() {
             className="object-cover object-[62%_50%] md:object-[50%_50%]"
           />
         </div>
+        <HeroVideo />
       </m.div>
 
       {/* Light + legibility */}

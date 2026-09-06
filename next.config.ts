@@ -36,6 +36,10 @@ function contentSecurityPolicy(isDev: boolean): string {
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' blob: data: ${IMAGE_ORIGINS.join(" ")}`,
     "font-src 'self' data:",
+    // The hero background video, served from /public. Stated explicitly
+    // rather than left to default-src so that tightening default-src
+    // later cannot switch the video off without anyone noticing.
+    "media-src 'self'",
     // The RFQ posts to this origin. Add an external endpoint here if
     // NEXT_PUBLIC_FORMS_ENDPOINT points somewhere else.
     `connect-src 'self'${isDev ? " ws: wss:" : ""}`,

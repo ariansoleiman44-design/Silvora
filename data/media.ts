@@ -101,6 +101,20 @@ function unsplash(id: string, opts: UnsplashOptions = {}): string {
 
 export const media = {
   /* ---------------------------------------------------------------- Heroes */
+  /*
+   * The homepage hero still. This one is a local file, not Unsplash: it
+   * is a frame taken from public/media/hero-bales.mp4, so the still and
+   * the video are the same shot and there is no visible change of scene
+   * when the video fades in over it.
+   *
+   * It is the LCP element on the homepage. The video never is — see
+   * components/home/HeroVideo.tsx.
+   */
+  homeHeroPoster: {
+    src: "/media/hero-bales-poster.jpg",
+    alt: "Wrapped corn silage bales across a mown field under a heavy sky",
+    ratio: 16 / 9,
+  },
   homeHero: {
     // The hero should show the product, not the crop: a wrapped silage
     // bale is what the business sells. Cropped low and wide so the bales
