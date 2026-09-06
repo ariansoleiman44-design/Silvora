@@ -54,6 +54,9 @@ a { color: inherit; }
 }
 
 .admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-decoration: none;
@@ -65,6 +68,8 @@ a { color: inherit; }
   opacity: 0.6;
   letter-spacing: 0.04em;
 }
+
+.admin-mark { width: 32px; height: 32px; object-fit: contain; }
 
 .admin-nav { display: flex; gap: 4px; flex: 1; }
 .admin-nav a {
@@ -209,6 +214,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 .login-wrap { min-height: 78vh; display: grid; place-items: center; padding: 24px; }
 .login-card { width: 100%; max-width: 360px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 26px; }
+.login-mark { width: 64px; height: 64px; object-fit: contain; margin: 0 auto 14px; display: block; }
 .login-card h1 { font-size: 17px; margin: 0 0 4px; }
 .login-card p.hint { color: var(--ink-soft); font-size: 13px; margin: 0 0 18px; }
 

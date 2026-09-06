@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { adminAuthStatus } from "@/lib/server/admin-auth";
 import { isSupabaseConfigured } from "@/lib/server/supabase";
 import { LoginForm } from "./LoginForm";
@@ -16,6 +17,16 @@ export default async function LoginPage({
   return (
     <div className="login-wrap">
       <div className="login-card">
+        {/* 64px — large enough that the mark actually reads. */}
+        <Image
+          src="/logo/symbol.png"
+          alt=""
+          width={512}
+          height={512}
+          sizes="128px"
+          className="login-mark"
+          priority
+        />
         <h1>Corn Fodder admin</h1>
         <p className="hint">Quote requests and product content.</p>
 

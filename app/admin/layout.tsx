@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import "./admin.css";
 
@@ -45,6 +46,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <body className="admin">
         <header className="admin-bar">
           <Link href="/admin" className="admin-brand">
+            {/*
+              32px. The mark is a fine-line design and starts to break up
+              below roughly 36px (see components/ui/Logo.tsx), so here it
+              works as a recognisable colour cue beside the name rather
+              than as legible artwork. The name carries the identity.
+            */}
+            <Image
+              src="/logo/symbol.png"
+              alt=""
+              width={512}
+              height={512}
+              sizes="64px"
+              className="admin-mark"
+              priority
+            />
             Corn Fodder<span>admin</span>
           </Link>
           <nav className="admin-nav">
