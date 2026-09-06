@@ -1,5 +1,6 @@
+import NextLink from "next/link";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Lock } from "lucide-react";
 import { Logo, LogoSymbol } from "@/components/ui/Logo";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 
@@ -132,6 +133,34 @@ export function Footer() {
                 </span>
               ))}
             </span>
+            {/*
+              TEMPORARY — remove by setting features.adminLinkEnabled to
+              false in data/site-config.ts. Nothing else needs changing.
+
+              next/link directly, not LocaleLink: /admin is a single
+              English tree outside the [locale] routes, so a
+              locale-aware link would point at /ar/admin and 404.
+
+              prefetch is off deliberately. Prefetching /admin would
+              make every visitor who scrolls the footer fire a request
+              that redirects to the sign-in page — wasted round trips
+              for buyers, and noise in the logs.
+
+              nofollow because the panel is already disallowed in
+              robots.txt; there is no reason to spend crawl budget
+              confirming it.
+            */}
+            {siteConfig.features.adminLinkEnabled && (
+              <NextLink
+                href="/admin"
+                prefetch={false}
+                rel="nofollow"
+                className="inline-flex items-center gap-1.5 rounded-full border border-cream/25 px-3 py-1 text-cream/70 transition-colors hover:border-cream/50 hover:text-cream"
+              >
+                <Lock className="h-3 w-3" aria-hidden />
+                Admin
+              </NextLink>
+            )}
             <a href="#top" className="inline-flex items-center gap-1.5 hover:text-cream">
               {copy.footer.backToTop}
               <ArrowUp className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />

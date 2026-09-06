@@ -168,6 +168,23 @@ export const siteConfig = {
     whatsappEnabled: true,
     phoneEnabled: true,
     emailEnabled: true,
+    /**
+     * TEMPORARY — shows a small "Admin" link in the footer so the panel
+     * is reachable without typing the URL while the site is being
+     * reviewed.
+     *
+     * TO REMOVE IT LATER: set this to false. That is the whole change —
+     * nothing else needs editing. The panel itself stays exactly where
+     * it is at /admin and remains password-protected either way; this
+     * flag only controls whether the link is rendered.
+     *
+     * Worth knowing while it is on: the link tells every visitor the
+     * panel exists. That is not a vulnerability — /admin is behind a
+     * session check and excluded from robots.txt — but it is an
+     * invitation to try the door, so turn it off before the site is
+     * promoted anywhere.
+     */
+    adminLinkEnabled: true,
     /** No provider is wired — see lib/analytics.ts. */
     analyticsEnabled: false,
     marketingEnabled: false,
