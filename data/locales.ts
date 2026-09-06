@@ -79,12 +79,13 @@ export const defaultLocale: LocaleCode = "en";
 
 /** Locales that are actually translated and safe to link to. */
 /**
- * Locales that are translated AND reviewed well enough to link to.
+ * Locales that are translated and linked from the site.
  *
- * `kmr` (Badini) is deliberately absent: the translation exists in
- * data/kmr/ but has not been checked by a native speaker, and Kurmanji
- * in Arabic script is not standardised enough to ship unreviewed. It
- * shows in the switcher as unavailable. Add "kmr" here once a Badini
- * speaker has been through docs/KMR-REVIEW.md.
+ * `kmr` (Badini) is live at the owner's request, but its translation has
+ * NOT yet been checked by a native speaker. Kurmanji in the Arabic
+ * script is not standardised — see the header of data/kmr/copy.kmr.ts —
+ * so parts of it are expected to need rewriting rather than
+ * proofreading. docs/KMR-REVIEW.md is the worksheet for that, and
+ * `npm run launch:audit` reports it as an outstanding item.
  */
-export const activeLocales: LocaleCode[] = ["en", "ar", "ckb"];
+export const activeLocales: LocaleCode[] = ["en", "ar", "ckb", "kmr"];

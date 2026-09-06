@@ -376,13 +376,13 @@ data files.
 
 ## 14. Languages
 
-Four locales, three of them live:
+Four live locales:
 
 ```
 /products        English         (default, no prefix — existing URLs unchanged)
 /ar/products     العربية
 /ckb/products    کوردیی سۆرانی
-/kmr/products    کوردیا بادینی   — built, NOT enabled (see below)
+/kmr/products    کوردیا بادینی
 ```
 
 **How it works**
@@ -436,11 +436,17 @@ One sheet per locale: every string beside its English source and its
 `data/` path, with per-language guidance at the top. Flags anything
 byte-identical to the English.
 
-**Badini is gated on purpose.** `kmr` is absent from `activeLocales`, so
-`/kmr/*` 404s and the switcher shows it as unavailable. Kurmanji in the
-Arabic script is not standardised enough to publish without a native
-speaker rewriting parts of it — see the header of `data/kmr/copy.kmr.ts`.
-Enabling it is one line, after `docs/KMR-REVIEW.md` is reviewed.
+**No translation has been reviewed by a native speaker yet.** All three
+were written to be published, but Badini in particular is expected to
+need partial rewriting — Kurmanji in the Arabic script is not
+standardised. See the header of `data/kmr/copy.kmr.ts` and the
+terminology table at the top of `docs/KMR-REVIEW.md`.
+
+**Locale codes are ISO 639-3**, not the `ku` macrolanguage: `ckb`
+(Sorani) and `kmr` (Badini) are not interchangeable in writing. Both are
+three letters — `stripLocale()` matches against the locale list rather
+than a length pattern, because an earlier two-letter regex silently
+broke the language switcher on Kurdish pages.
 
 **Adding a locale**
 

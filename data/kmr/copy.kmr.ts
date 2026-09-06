@@ -3,20 +3,22 @@ import type { Copy } from "@/data/copy";
 /**
  * SITE COPY — کوردیا بادینی (Northern Kurdish / Kurmanji, Arabic script)
  * --------------------------------------------------------------------
- * ⚠ CONFIDENCE WARNING — READ BEFORE PUBLISHING
+ * ⚠ CONFIDENCE WARNING — THIS LOCALE IS LIVE AND UNREVIEWED
  *
- * This translation is a DRAFT and is not linked from the site. `kmr` is
- * deliberately absent from `activeLocales` in data/locales.ts.
+ * This translation is published (`kmr` is in `activeLocales`) but no
+ * native speaker has read it. That was a deliberate decision by the
+ * site owner, made with the risk below understood.
  *
- * Why, plainly: Badini Kurmanji written in the Arabic script is far less
+ * Why it matters, plainly: Badini Kurmanji written in the Arabic script is far less
  * standardised than Sorani. Orthography varies between Duhok, Zakho and
  * Amedi; ezafe and case marking are written inconsistently in practice;
  * and the agricultural register has little published written corpus.
  * The Arabic and Sorani files on this site are drafts that need
  * proofreading. This one needs a Badini speaker to REWRITE parts of it.
  *
- * Do not enable this locale on the strength of it looking plausible.
- * See docs/KMR-REVIEW.md, then add "kmr" to activeLocales.
+ * Do not mistake it looking plausible for it being right. The review
+ * worksheet is docs/KMR-REVIEW.md; it opens with the ten terminology
+ * choices carrying the least certainty, each used site-wide.
  *
  * Terminology used (all of it open to correction):
  *   silage             سایلێج
@@ -160,8 +162,8 @@ export const copyKmr: Copy = {
 
   trust: {
     items: [
-      { title: "دروینەکا ڕێکخستی", text: "د دەمێ گونجای دا دئێتە بڕین, نە دەمێ ڕۆژژمێر دبێژیت." },
-      { title: "پێچانەکا توند", text: "چین ل سەر چینێ, دا کو بەرهەم خۆ بپارێزیت." },
+      { title: "دروینەکا ڕێکخستی", text: "د دەمێ گونجای دا دئێتە بڕین، نە دەمێ ڕۆژژمێر دبێژیت." },
+      { title: "پێچانەکا توند", text: "چین ل سەر چینێ، دا کو بەرهەم خۆ بپارێزیت." },
       { title: "دابینکرنا بەردەوام", text: "بارێن پلانکری و بەرنامەیێن دووبارە ب درێژاهیا وەرزی." },
       { title: "کوالیتی ژ زەڤییێ هەتا ئاخوڕێ", text: "ئێک پیڤەر ژ زەڤییێ هەتا ڕێکا خوارنێ." },
     ],
@@ -171,7 +173,7 @@ export const copyKmr: Copy = {
     eyebrow: "باوەریا مە",
     headline: ["کوالیتی دەست پێ دکەت", "بەری دروینێ."],
     paragraphs: [
-      "خوارندانا باش یا تەریشی دەمەکێ درێژ بەری گەهشتنا بالەیێ بۆ پلانگەهێ دەست پێ دکەت. ژ بەرهەمی دەست پێ دکەت — جور، ئاخ, و ئەو ڕۆژا دئێتە بڕین.",
+      "خوارندانا باش یا تەریشی دەمەکێ درێژ بەری گەهشتنا بالەیێ بۆ پلانگەهێ دەست پێ دکەت. ژ بەرهەمی دەست پێ دکەت — جور، ئاخ، و ئەو ڕۆژا دئێتە بڕین.",
       "هەر تشتێ پشتی وێ دئێت پاراستنا وی تشتییە یێ زەڤییێ دەرئێخستی: هوردکرنەکا ئێکسان، پەستاندنەکا توند، و گرتنەکا زوی.",
     ],
     cta: "چاوا کار دکەین",

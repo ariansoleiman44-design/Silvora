@@ -243,10 +243,12 @@ warning(
   "no translated locale has been checked by a native speaker. Run npm run i18n:review and have docs/AR-REVIEW.md and docs/CKB-REVIEW.md read before launch — agricultural terminology especially.",
 );
 
-warning(
-  "Badini (kmr)",
-  "built but NOT enabled — Kurmanji in the Arabic script needs a native speaker to rewrite parts of it. See docs/KMR-REVIEW.md, then add \"kmr\" to activeLocales.",
-);
+if (activeLocales.includes("kmr" as never)) {
+  warning(
+    "Badini (kmr) is LIVE but unreviewed",
+    "Kurmanji in the Arabic script is not standardised and parts of this translation are expected to need rewriting, not just proofreading. It is published and linked. Get docs/KMR-REVIEW.md read by a Badini speaker — start with the terminology table at the top.",
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* Structural guarantees                                               */

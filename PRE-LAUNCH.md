@@ -410,35 +410,39 @@ Have a nutritionist check them for your market.
 | English | `/` | live (default, unprefixed) |
 | العربية | `/ar` | live — draft, needs native review |
 | کوردیی سۆرانی | `/ckb` | live — draft, needs native review |
-| کوردیا بادینی | `/kmr` | **built but NOT live** |
+| کوردیا بادینی | `/kmr` | live — **draft, needs partial rewrite** |
 
 All four are complete translations of the same 1,142 strings: UI copy,
 9 products, 16 FAQs, the 8-step process, the comparison table,
 navigation, labels, per-page metadata and the whole RFQ wizard.
 
-**Infrastructure** (shared by every locale): one route tree under
-`app/[locale]` plus a proxy rewrite, RTL layout, `hreflang` on every page
-and in the sitemap, a switcher that stays on the same page across
-languages, RTL-aware scroll maths, and Western digits everywhere.
+**Infrastructure** (shared): one route tree under `app/[locale]` plus a
+proxy rewrite, RTL layout, `hreflang` on every page and in the sitemap,
+a switcher that stays on the same page across languages, RTL-aware
+scroll maths, and Western digits everywhere.
 
 Arabic-script typography: Amiri (display) + IBM Plex Sans Arabic (text),
 with `uppercase`, letter-spacing and `italic` neutralised — all three are
 meaningless or visibly broken in Arabic script.
 
-### Badini is deliberately gated
+### None of the three translations has been reviewed
 
-`kmr` is absent from `activeLocales` in `data/locales.ts`, so `/kmr/*`
-returns 404 and the switcher lists it as unavailable. Nothing links to it.
+They were written to be published, but no native speaker has read any of
+them. Agricultural vocabulary is where regional usage most often departs
+from the standard forms chosen here.
 
-This is not an oversight. Badini Kurmanji written in the Arabic script is
-far less standardised than Sorani: orthography varies between Duhok,
-Zakho and Amedi, ezafe and case marking are written inconsistently in
-practice, and there is little published agricultural writing to follow.
-The translation was produced with materially lower confidence than the
-Arabic and Sorani, and it needs a Badini speaker to **rewrite** parts of
-it, not merely proofread.
+**Badini needs the most attention.** Kurmanji written in the Arabic
+script is not standardised: orthography varies between Duhok, Zakho and
+Amedi, ezafe and case marking are written inconsistently, and there is
+little published agricultural writing to follow. Parts of it are
+expected to need **rewriting**, not proofreading. It is live at the
+owner's decision, with that risk understood.
 
-To enable it after review, add `"kmr"` to `activeLocales`. One line.
+`docs/KMR-REVIEW.md` opens with a terminology table listing the ten
+choices with the least certainty behind them — پلانگەه for "farm",
+سایلێج, بالە, هوردکرن, پەستاندن, ماددا هشک, دروین, گەنمێ شامی, تەریش,
+چێلەک. Each is used site-wide, so one correction there propagates
+everywhere. That table is where a reviewer should start.
 
 ### Reviewing
 
@@ -449,11 +453,11 @@ npm run i18n:review
 Writes one sheet per locale — `docs/AR-REVIEW.md`, `docs/CKB-REVIEW.md`,
 `docs/KMR-REVIEW.md` — each listing every string beside its English
 source and its `data/` path, with per-language guidance at the top. It
-also flags any translation byte-identical to the English (currently zero
-in all three).
+flags any translation byte-identical to the English (currently zero in
+all three).
 
-`npm run validate:data` checks that every locale's product overlay,
-FAQ array and process array line up with the English source.
+`npm run validate:data` checks that every locale's product overlay, FAQ
+array and process array line up with the English source.
 
 Legal pages (privacy / terms / cookies) are translated in their UI
 framing, but their body text remains the English placeholder — a lawyer
@@ -491,7 +495,7 @@ Verification:
 - [ ] Print the review step — one or two clean pages
 - [ ] `docs/AR-REVIEW.md` reviewed by a native Arabic speaker
 - [ ] `docs/CKB-REVIEW.md` reviewed by a native Sorani speaker
-- [ ] `docs/KMR-REVIEW.md` reviewed (and partly rewritten) by a Badini speaker, before `kmr` is added to `activeLocales`
+- [ ] `docs/KMR-REVIEW.md` reviewed (and partly rewritten) by a Badini speaker — **this locale is already live**, start with its terminology table
 - [ ] RTL pages checked at 390px — layout, no clipped headlines
 - [ ] Arabic-script fonts render Kurdish letters (ڕ ڵ ۆ ێ ژ چ پ گ) with no missing glyphs
 - [ ] 390px: complete an RFQ with the keyboard open; the sticky bar never
