@@ -1,4 +1,4 @@
-# SILVORA — Premium Corn Silage Bales
+# Corn Fodder — Premium Corn Silage Bales
 
 A production-quality Next.js website for a premium corn silage bale supplier.
 Cinematic, editorial, mobile-first, quote-driven — and built so that every
@@ -69,7 +69,7 @@ for every placeholder mentioned here.
 **1. Configure the domain**
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://silvora.example   # no trailing slash, https
+NEXT_PUBLIC_SITE_URL=https://corn-fodder.example   # no trailing slash, https
 ```
 
 Anything else (example.com, localhost, http) is a launch blocker —
@@ -147,9 +147,9 @@ No `example.com`, no `localhost`, one canonical per page.
 **12. Submit a real test RFQ**
 
 Use an obvious marker so it is never mistaken for a lead — buyer name
-`SILVORA LAUNCH TEST`. Run one of each order type: farm, commercial,
+`Corn Fodder LAUNCH TEST`. Run one of each order type: farm, commercial,
 distributor, export. Confirm the confirmation screen shows **Request
-received** with a `SLV-…` reference, and that the reference matches the
+received** with a `CF-…` reference, and that the reference matches the
 stored record (the server issues it, not the browser).
 
 **13. Verify the notification**
@@ -186,7 +186,7 @@ successful submission. Combined with the launch audit — which fails the
 command with a non-zero exit while `quoteServiceMode` is `mock` — a
 staging configuration cannot quietly ship as production.
 
-Keep test RFQs marked. `SILVORA LAUNCH TEST` in the buyer name is
+Keep test RFQs marked. `Corn Fodder LAUNCH TEST` in the buyer name is
 enough, and it keeps genuine leads clean.
 
 ---
@@ -320,11 +320,11 @@ after a timeout does not create two records, and a quiet honeypot plus
 timing check. No CAPTCHA — buyers on rural connections must not be
 challenged.
 
-**The reference is issued by the server** (`SLV-YYMMDD-XXXX`) and
+**The reference is issued by the server** (`CF-YYMMDD-XXXX`) and
 replaces the browser's draft label on success.
 
 The quote basket and all wizard state live in `lib/quote-store.tsx`,
-persisted under `silvora.quote.v2`.
+persisted under `cornfodder.quote.v2`.
 
 ## 10. Where to replace imagery
 
@@ -507,5 +507,5 @@ removing it would let the site mislead a real buyer.
 
 ---
 
-© SILVORA. Prototype photography via Unsplash (free licence) — replace
+© Corn Fodder. Prototype photography via Unsplash (free licence) — replace
 before commercial launch.

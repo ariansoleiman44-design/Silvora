@@ -25,7 +25,7 @@ import "./admin.css";
  */
 
 export const metadata: Metadata = {
-  title: { default: "SILVORA Admin", template: "%s · SILVORA Admin" },
+  title: { default: "Corn Fodder Admin", template: "%s · Corn Fodder Admin" },
   robots: { index: false, follow: false, nocache: true },
 };
 
@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <body className="admin">
         <header className="admin-bar">
           <Link href="/admin" className="admin-brand">
-            SILVORA<span>admin</span>
+            Corn Fodder<span>admin</span>
           </Link>
           <nav className="admin-nav">
             {NAV.map((item) => (

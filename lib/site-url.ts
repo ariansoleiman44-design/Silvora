@@ -108,7 +108,7 @@ const check = checkSiteUrl();
  * load — the flag lives on globalThis instead. A misconfigured origin
  * needs to be seen, not to bury the rest of the log.
  */
-const WARNED = Symbol.for("silvora.site-url.warned");
+const WARNED = Symbol.for("cornfodder.site-url.warned");
 type WarnedGlobal = typeof globalThis & { [WARNED]?: boolean };
 
 if (!check.ok && check.problem && !(globalThis as WarnedGlobal)[WARNED]) {

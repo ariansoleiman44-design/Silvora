@@ -45,7 +45,7 @@ const hash = hashPassword(password);
 const secret = randomBytes(32).toString("hex");
 
 console.log(`
-SILVORA — ADMIN CREDENTIALS
+Corn Fodder — ADMIN CREDENTIALS
 ===========================================================
 
   Password    ${password}

@@ -51,7 +51,7 @@ TypeScript source of truth: `QuoteRequest` in
 
 | Field | Type | Notes |
 |---|---|---|
-| `reference` | `string` | Client-generated, e.g. `SLV-260906-4KX2`. **Not authoritative** — issue your own and return it. |
+| `reference` | `string` | Client-generated, e.g. `CF-260906-4KX2`. **Not authoritative** — issue your own and return it. |
 | `createdAt` | ISO 8601 `string` | Browser clock. Do not trust it for ordering. |
 | `orderType` | `"farm" \| "commercial" \| "distributor" \| "export"` | Decides which `requirements` fields were shown. |
 | `buyer` | `QuoteBuyer` | `name`, `company`, `email`, `phone`, `whatsapp`. |
@@ -109,7 +109,7 @@ Every field is optional; which ones are populated depends on
 ### Success — `200 OK`
 
 ```json
-{ "reference": "SLV-2026-00184" }
+{ "reference": "CF-2026-00184" }
 ```
 
 `reference` is optional. When present it replaces the client-generated
@@ -138,7 +138,7 @@ Request:
 {
   "type": "quote",
   "payload": {
-    "reference": "SLV-260906-4KX2",
+    "reference": "CF-260906-4KX2",
     "createdAt": "2026-09-06T09:14:22.418Z",
     "orderType": "commercial",
     "buyer": {
@@ -204,7 +204,7 @@ Request:
 Response:
 
 ```json
-{ "reference": "SLV-2026-00184" }
+{ "reference": "CF-2026-00184" }
 ```
 
 ---

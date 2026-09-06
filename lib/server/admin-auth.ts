@@ -25,7 +25,7 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypt
  * once, which is the right blunt instrument for a panel this size.
  */
 
-export const ADMIN_COOKIE = "silvora_admin";
+export const ADMIN_COOKIE = "cornfodder_admin";
 
 /** Eight hours: a working day, then log in again. */
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;

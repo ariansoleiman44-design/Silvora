@@ -188,7 +188,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
         <div className="lg:col-span-9">
           {visible.length === 0 ? (
             <div className="flex min-h-[40vh] flex-col items-center justify-center border border-dashed border-ink/20 p-10 text-center">
-              <LogoSymbol tone="dark" ribColor="#f5f1e7" className="h-12 w-12 opacity-30" />
+              <LogoSymbol className="h-12 w-12 opacity-30" />
               <p className="display-sm mt-6">{t.empty[0]}</p>
               <p className="mt-2 max-w-sm text-sm text-ink/60">{t.empty[1]}</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">

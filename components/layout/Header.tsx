@@ -1,6 +1,7 @@
 "use client";
 
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
+import { brandNameFor } from "@/lib/brand";
 import { usePathname } from "next/navigation";
 import { Menu, Package, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -11,13 +12,14 @@ import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
 import { ProductSearch } from "@/components/search/ProductSearch";
 import { useDict } from "@/lib/locale-client";
 
-import { useCopy } from "@/lib/locale-client";
+import { useCopy, useLocale } from "@/lib/locale-client";
 import { siteConfig } from "@/data/site-config";
 import { useQuote } from "@/lib/quote-store";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const copy = useCopy();
+  const locale = useLocale();
   const mainNav = useDict().nav.main;
   const pathname = usePathname();
   // The menu remembers the path it was opened on, so a route change
@@ -108,7 +110,7 @@ export function Header() {
           )}
         >
           <Link href="/" aria-label={`${siteConfig.brandName} — home`} className="relative z-10 shrink-0">
-            <Logo variant="horizontal" tone="light" ribColor="transparent" className="text-[1.05rem] md:text-[1.2rem]" />
+            <Logo variant="horizontal" tone="light" name={brandNameFor(locale)} className="text-[1.05rem] md:text-[1.2rem]" />
           </Link>
 
           {/* Desktop navigation */}

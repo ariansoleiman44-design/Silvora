@@ -8,8 +8,8 @@ import { randomInt } from "node:crypto";
  * matters — the one in the confirmation, the email and the record — is
  * issued here and returned in the response.
  *
- * Shape: SLV-YYMMDD-XXXX
- *   SLV     brand prefix
+ * Shape: CF-YYMMDD-XXXX
+ *   CF      brand prefix
  *   YYMMDD  submission date, so a reference is human-sortable
  *   XXXX    random, from an unambiguous alphabet
  *
@@ -29,7 +29,7 @@ function randomSuffix(length = 4): string {
   return out;
 }
 
-export function createServerReference(prefix = "SLV", now = new Date()): string {
+export function createServerReference(prefix = "CF", now = new Date()): string {
   const y = now.getUTCFullYear().toString().slice(-2);
   const m = String(now.getUTCMonth() + 1).padStart(2, "0");
   const d = String(now.getUTCDate()).padStart(2, "0");

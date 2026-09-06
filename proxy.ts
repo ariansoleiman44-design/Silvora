@@ -46,7 +46,7 @@ export default function proxy(request: NextRequest) {
 
   const response = NextResponse.rewrite(url);
   // Useful for logging and for any handler that needs the locale.
-  response.headers.set("x-silvora-locale", defaultLocale);
+  response.headers.set("x-cornfodder-locale", defaultLocale);
   return response;
 }
 

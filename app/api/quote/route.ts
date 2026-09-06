@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     // Answer like a success so automation gains no signal, but nothing
     // is stored, sent, or given a real reference.
     console.warn(`[api/quote] rejected bot signal: ${bot.signal}`);
-    return NextResponse.json({ reference: createServerReference("SLV") }, { status: 200 });
+    return NextResponse.json({ reference: createServerReference("CF") }, { status: 200 });
   }
 
   /* 4 — validate ----------------------------------------------------- */
@@ -138,7 +138,7 @@ export async function POST(request: Request) {
     });
   }
 
-  const reference = createServerReference("SLV");
+  const reference = createServerReference("CF");
   const record = { ...result.value, reference };
 
   try {

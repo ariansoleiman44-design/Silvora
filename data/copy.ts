@@ -12,7 +12,7 @@
 export const copy = {
   /** Locale-specific site metadata. Per-page metadata lives with the page. */
   seo: {
-    defaultTitle: "SILVORA — Wrapped Corn Silage Bales & Bulk Maize Silage Supply",
+    defaultTitle: "Corn Fodder — Wrapped Corn Silage Bales & Bulk Maize Silage Supply",
     defaultDescription:
       "Premium wrapped corn silage bales for dairy and beef herds — round, square and compact formats. Farm orders, commercial supply and export enquiries, with delivery planned around your operation. Pricing quoted per order.",
   },
@@ -37,12 +37,12 @@ export const copy = {
     quality: {
       title: "Quality — From Crop to Inspection",
       description:
-        "How Silvora corn silage is grown, harvested, chopped, compacted, wrapped, fermented, stored, inspected and transported — and how to read a batch analysis.",
+        "How Corn Fodder corn silage is grown, harvested, chopped, compacted, wrapped, fermented, stored, inspected and transported — and how to read a batch analysis.",
     },
     process: {
       title: "Our Process — From Field to Feed",
       description:
-        "Grow, harvest, chop, compact, wrap, ferment, deliver, feed. The eight steps every Silvora corn silage bale goes through.",
+        "Grow, harvest, chop, compact, wrap, ferment, deliver, feed. The eight steps every Corn Fodder corn silage bale goes through.",
     },
     logistics: {
       title: "Logistics — Farm, Commercial & Export Orders",
@@ -52,12 +52,12 @@ export const copy = {
     about: {
       title: "About — Respect for the Crop, the Herd and the Farmer",
       description:
-        "Silvora exists to make premium corn silage the standard rather than the exception. Our mission, approach, quality philosophy and future vision.",
+        "Corn Fodder exists to make premium corn silage the standard rather than the exception. Our mission, approach, quality philosophy and future vision.",
     },
     contact: {
       title: "Contact Sales",
       description:
-        "Sales, samples, inspections and logistics — reach the Silvora team by phone, WhatsApp, email or the contact form.",
+        "Sales, samples, inspections and logistics — reach the Corn Fodder team by phone, WhatsApp, email or the contact form.",
     },
     quote: {
       title: "Request a Quote — Corn Silage Bales",
@@ -67,7 +67,7 @@ export const copy = {
     results: {
       title: "Results — Corn Silage in Working Herds",
       description:
-        "How operations feed Silvora corn silage: herd, challenge, supply plan and the measured outcome.",
+        "How operations feed Corn Fodder corn silage: herd, challenge, supply plan and the measured outcome.",
     },
     privacy: { title: "Privacy Policy", description: "How we handle the details you share with us." },
     terms: { title: "Terms of Sale", description: "The terms that apply to quotes, orders and deliveries." },
@@ -210,7 +210,7 @@ export const copy = {
   },
 
   why: {
-    eyebrow: "Why Silvora",
+    eyebrow: "Why Corn Fodder",
     headline: ["The difference is", "in the details."],
     intro: "No slogans about being the best. Just the decisions that make a better bale, one after another.",
     items: [
@@ -723,7 +723,7 @@ export const copy = {
   about: {
     eyebrow: "About",
     headline: ["Respect for the crop.", "Respect for the herd."],
-    intro: "Silvora exists to make premium corn silage the standard rather than the exception.",
+    intro: "Corn Fodder exists to make premium corn silage the standard rather than the exception.",
     manifesto: [
       { title: "Respect for the crop", text: "The plant did the hard work. Our job is not to waste a gram of it." },
       { title: "Respect for livestock", text: "Animals eat what we make every day. Consistency is a duty, not a feature." },
@@ -803,7 +803,7 @@ export const copy = {
   processPage: {
     eyebrow: "Our process",
     headline: ["From field", "to feed."],
-    intro: "The eight steps every Silvora bale goes through, in order, every time.",
+    intro: "The eight steps every Corn Fodder bale goes through, in order, every time.",
   },
 
   notFound: {

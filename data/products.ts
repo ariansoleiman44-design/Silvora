@@ -278,7 +278,7 @@ export const products: Product[] = [
     shortDescription:
       "Round corn silage selected from crops and harvest windows targeted at dairy rations.",
     description: [
-      "Dairy rations reward consistency. The Dairy Performance Bale is drawn from fields and harvest timings we select with the milking herd in mind, then chopped, compacted and sealed like every Silvora bale.",
+      "Dairy rations reward consistency. The Dairy Performance Bale is drawn from fields and harvest timings we select with the milking herd in mind, then chopped, compacted and sealed like every Corn Fodder bale.",
       "Per-batch analysis is available so your nutritionist can build the ration on real numbers rather than assumptions.",
     ],
     images: ["dairyBarn", "balesField", "holsteinGolden"],

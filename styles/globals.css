@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   SILVORA design tokens
+   Corn Fodder design tokens
    Change brand colours, fonts and easing here. Tailwind v4 turns every
    --color-* token into utilities (bg-forest, text-gold, border-stone …).
 ------------------------------------------------------------------- */
@@ -293,7 +293,7 @@
 }
 
 /* ------------------------------------------------------------------
-   SILVORA GRADE
+   Corn Fodder GRADE
    --------------------------------------------------------------------
    One colour treatment applied to every photograph so images from
    different sources read as a single commissioned shoot.
@@ -522,7 +522,7 @@
 }
 
 /* Numbers, references and measurements stay LTR inside Arabic text so
-   "SLV-260906-A7F4" and "700 – 800 كغم" read correctly. */
+   "CF-260906-A7F4" and "700 – 800 كغم" read correctly. */
 [dir="rtl"] .mono-num {
   direction: ltr;
   unicode-bidi: embed;

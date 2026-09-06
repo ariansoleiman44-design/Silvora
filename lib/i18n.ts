@@ -87,6 +87,6 @@ export function stripLocale(pathname: string): { locale: LocaleCode; path: strin
  * Numbers: quantities, weights and references stay in Western digits in
  * every locale — see `intlLocale` above.
  *
- * Brand: SILVORA is a proper noun and stays in Latin script in all
+ * Brand: Corn Fodder is a proper noun and stays in Latin script in all
  * locales, including inside Arabic sentences.
  */

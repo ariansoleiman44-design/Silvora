@@ -101,7 +101,7 @@ export interface CalculatorEstimate {
 
 /** The full payload a backend receives. */
 export interface QuoteRequest {
-  /** Client-generated, e.g. "SLV-260906-4KX2". Not authoritative. */
+  /** Client-generated, e.g. "CF-260906-4KX2". Not authoritative. */
   reference: string;
   createdAt: string;
   orderType: OrderKind;

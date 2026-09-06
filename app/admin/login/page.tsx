@@ -16,7 +16,7 @@ export default async function LoginPage({
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <h1>SILVORA admin</h1>
+        <h1>Corn Fodder admin</h1>
         <p className="hint">Quote requests and product content.</p>
 
         {!auth.configured ? (

@@ -6,11 +6,14 @@ import { SocialIcon } from "@/components/ui/SocialIcon";
 
 import { copyrightName, siteConfig } from "@/data/site-config";
 import { isEmailConfigured, isPhoneConfigured, isWhatsappConfigured, mailtoHref, telHref, whatsappHref } from "@/lib/contact";
+import { brandNameFor } from "@/lib/brand";
+import { getRequestLocale } from "@/lib/locale-server";
 import { getCopy, getDictionary } from "@/lib/dictionary";
 import { locales } from "@/lib/i18n";
 
 export function Footer() {
   const copy = getCopy();
+  const brand = brandNameFor(getRequestLocale());
   const { footer: footerNav, legal: legalNav } = getDictionary().nav;
   const year = new Date().getFullYear();
   const c = siteConfig.contact;
@@ -23,7 +26,7 @@ export function Footer() {
         {/* Top: statement + columns */}
         <div className="grid gap-12 border-b border-cream/10 py-16 md:grid-cols-12 md:py-24">
           <div className="md:col-span-5 lg:col-span-4">
-            <Logo variant="horizontal" tone="light" ribColor="#0d100e" className="text-[1.25rem]" />
+            <Logo variant="horizontal" tone="light" name={brand} className="text-[1.25rem]" />
             <p className="mt-6 max-w-sm text-cream/65 body-lg">{copy.footer.statement}</p>
             <p className="mt-6 font-display text-xl italic text-wheat/80">{siteConfig.tagline}</p>
           </div>
@@ -108,9 +111,10 @@ export function Footer() {
             <Logo
               variant="wordmark"
               tone="light"
+              name={brand}
               className="text-[clamp(3.5rem,17vw,19rem)] tracking-[0.06em] text-cream/95 -ms-[0.03em]"
             />
-            <LogoSymbol tone="gold" ribColor="#0d100e" className="mb-2 hidden h-16 w-16 md:block lg:h-24 lg:w-24" />
+            <LogoSymbol className="mb-2 hidden h-16 w-16 md:block lg:h-24 lg:w-24" />
           </div>
         </div>
 

@@ -107,7 +107,13 @@ if (notifiers.length === 0 && (store || externalEndpoint)) {
 /* ------------------------------------------------------------------ */
 
 const legal = siteConfig.legal;
-if (!legal.name?.trim() || legal.name.trim().toLowerCase() === "silvora") {
+/*
+ * Compared against the brand name rather than a hardcoded string, so
+ * this check keeps working after a rename. The legal entity is the
+ * REGISTERED company — if it is still just the brand, nobody has filled
+ * it in.
+ */
+if (!legal.name?.trim() || legal.name.trim().toLowerCase() === siteConfig.brandName.trim().toLowerCase()) {
   blocker(
     "Legal entity name",
     'still the brand placeholder — it appears in Organization structured data, the legal pages and the footer copyright',
@@ -315,7 +321,7 @@ const readies = items.filter((i) => i.level === "ready");
 const line = (mark: string, i: Item) =>
   `  ${mark} ${i.label}${i.detail ? `\n      ${i.detail}` : ""}`;
 
-console.log("\nSILVORA PRODUCTION AUDIT");
+console.log("\nCorn Fodder PRODUCTION AUDIT");
 console.log(`environment: NODE_ENV=${process.env.NODE_ENV ?? "development"}\n`);
 
 console.log(`BLOCKERS (${blockers.length})`);

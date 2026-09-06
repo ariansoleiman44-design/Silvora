@@ -116,7 +116,7 @@ export function QuoteWizard() {
         // Each step becomes a history entry, so the phone's back gesture
         // steps backwards through the flow instead of abandoning it.
         if (index !== current) {
-          window.history.pushState({ silvoraStep: index }, "");
+          window.history.pushState({ cornFodderStep: index }, "");
         }
         return index;
       });
@@ -128,10 +128,10 @@ export function QuoteWizard() {
 
   // Seed the first entry, then follow back/forward.
   useEffect(() => {
-    window.history.replaceState({ silvoraStep: 0 }, "");
+    window.history.replaceState({ cornFodderStep: 0 }, "");
     const onPop = (e: PopStateEvent) => {
-      const state = e.state as { silvoraStep?: number } | null;
-      if (typeof state?.silvoraStep === "number") setStep(state.silvoraStep);
+      const state = e.state as { cornFodderStep?: number } | null;
+      if (typeof state?.cornFodderStep === "number") setStep(state.cornFodderStep);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);

@@ -1,8 +1,8 @@
 {
-  "name": "silvora",
+  "name": "corn-fodder",
   "version": "1.0.0",
   "private": true,
-  "description": "SILVORA — premium corn silage bales. Next.js App Router site.",
+  "description": "Corn Fodder — premium corn silage bales. Next.js App Router site.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

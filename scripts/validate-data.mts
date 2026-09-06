@@ -304,7 +304,7 @@ for (const t of TRANSLATIONS) {
 const errors = findings.filter((f) => f.level === "error");
 const warnings = findings.filter((f) => f.level === "warn");
 
-console.log("\nSILVORA — PRODUCT DATA VALIDATION\n");
+console.log("\nCorn Fodder — PRODUCT DATA VALIDATION\n");
 console.log(`  ${products.length} products · ${mediaKeys.size} media keys · ${faqs.length} FAQs · ${caseStudies.length} case studies`);
 console.log(`  translations: ${TRANSLATIONS.map((t) => t.code).join(', ')}\n`);
 

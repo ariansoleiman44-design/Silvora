@@ -28,7 +28,7 @@ import { siteConfig } from "@/data/site-config";
  *
  * ── THE RULE ────────────────────────────────────────────────────────
  * A production build must never tell a customer their enquiry reached
- * SILVORA when nothing was sent. "mock" is therefore downgraded to
+ * Corn Fodder when nothing was sent. "mock" is therefore downgraded to
  * "unconfigured" whenever NODE_ENV === "production". Do not remove that
  * downgrade to "make the demo look better" — connect an endpoint instead.
  * ────────────────────────────────────────────────────────────────────
@@ -95,12 +95,12 @@ export function createIdempotencyKey(): string {
 /* ------------------------------------------------------------------ */
 
 /**
- * Locally generated request reference, e.g. `SLV-260906-4KX2`. It exists
+ * Locally generated request reference, e.g. `CF-260906-4KX2`. It exists
  * so a buyer and the sales team can talk about the same request. It is
  * NOT an order number and carries no authority — a backend is free to
  * issue its own and return it in the response.
  */
-export function createReference(prefix = "SLV"): string {
+export function createReference(prefix = "CF"): string {
   const now = new Date();
   const y = now.getFullYear().toString().slice(-2);
   const m = (now.getMonth() + 1).toString().padStart(2, "0");
@@ -115,7 +115,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /* Mock provider — development only                                    */
 /* ------------------------------------------------------------------ */
 
-const MOCK_KEY = "silvora.submissions.v1";
+const MOCK_KEY = "cornfodder.submissions.v1";
 
 const mockProvider: FormsProvider = {
   mode: "mock",
@@ -126,7 +126,7 @@ const mockProvider: FormsProvider = {
   },
   async submitContact(payload) {
     await wait(600);
-    const reference = createReference("SLV-C");
+    const reference = createReference("CF-C");
     persistMock({ type: "contact", reference, payload });
     return { ok: true, reference, mode: "mock" };
   },
@@ -270,7 +270,7 @@ const supabaseProvider: FormsProvider = {
       : { ok: true, reference: payload.reference, mode: "api" };
   },
   async submitContact(payload) {
-    const reference = createReference("SLV-C");
+    const reference = createReference("CF-C");
     const { error } = await supabase.from("contact_messages").insert({ reference, ...payload });
     return error ? { ok: false, error: error.message, mode: "api" } : { ok: true, reference, mode: "api" };
   },

@@ -1,4 +1,4 @@
-# SILVORA — Pre-launch checklist
+# Corn Fodder — Pre-launch checklist
 
 Everything in this file is a **placeholder, an unconnected service, or a
 demo value that must not go live**. Line numbers are accurate as of the
@@ -51,7 +51,7 @@ themselves.
 
 ```bash
 # Durable storage. This decides whether a submission counts as delivered.
-QUOTE_WEBHOOK_URL=https://api.your-domain/silvora/quotes
+QUOTE_WEBHOOK_URL=https://api.your-domain/corn-fodder/quotes
 QUOTE_WEBHOOK_SECRET=…            # optional bearer token
 
 # Sales notification (any JSON mail API; Resend's shape by default)
@@ -100,13 +100,13 @@ points at example.com / localhost.
 
 ## 2. BLOCKER — Legal identity
 
-Brand and legal entity are separate concepts. `SILVORA` is what
+Brand and legal entity are separate concepts. `Corn Fodder` is what
 customers read; the legal name belongs only in Organization structured
 data, the legal pages, the footer copyright and printed quote documents.
 
 | Line | Field | Current |
 |---|---|---|
-| 92 | `legal.name` | `"Silvora"` — placeholder. **Do not invent a registered name.** |
+| 92 | `legal.name` | `"Corn Fodder"` — placeholder. **Do not invent a registered name.** |
 | 93 | `legal.copyrightName` | empty → falls back to the brand |
 | 94 | `legal.registrationNumber` | empty (emitted as `identifier` when set) |
 | 95 | `legal.taxNumber` | empty (emitted as `taxID` when set) |
@@ -209,7 +209,7 @@ No product has batch records, so the batch section renders nothing.
 ```ts
 batches: [
   {
-    code: "SLV-2026-A-014",
+    code: "CF-2026-A-014",
     harvestSeason: "2026 first cut",
     origin: "Erbil Governorate",
     fieldReference: "Plot 7",         // internal, not shown publicly
@@ -288,7 +288,7 @@ the blockers, this is the highest-value remaining work.
    `photographer`, `license`
 
 **Do not bake colour grading into source files.** The `graded` treatment
-in `styles/globals.css` is what makes mixed material read as one SILVORA
+in `styles/globals.css` is what makes mixed material read as one Corn Fodder
 shoot, and it applies to owned photography too.
 
 Priority: `homeHero` → `baleEnd` (the sticky bale; an isolated cut-out on
@@ -339,7 +339,7 @@ Get publication permission in writing before adding either.
 
 | Asset | Location | State |
 |---|---|---|
-| Logo / symbol / wordmark | `components/ui/Logo.tsx` (inline SVG) + `public/logo/*.svg` | approved SILVORA identity |
+| Logo / symbol / wordmark | `components/ui/Logo.tsx` (inline SVG) + `public/logo/*.svg` | approved Corn Fodder identity |
 | Favicon | `app/icon.svg` | derived from the logo |
 | Default OG image | `public/og.jpg`, referenced at line 201 | **prototype artwork — replace with a real 1200×630** |
 | Product OG images | `app/products/[slug]/opengraph-image.tsx` | generated per product, brand colours, no fake data |
@@ -482,9 +482,9 @@ Verification:
 - [ ] `npm run build` clean
 - [ ] Sitemap, robots and canonical show the real domain — checked on the
       live site, not in source
-- [ ] A real test RFQ (buyer name `SILVORA LAUNCH TEST`) arrives, for each
+- [ ] A real test RFQ (buyer name `Corn Fodder LAUNCH TEST`) arrives, for each
       of the four order types
-- [ ] The confirmation shows "Request received" with a `SLV-…` reference
+- [ ] The confirmation shows "Request received" with a `CF-…` reference
       matching the stored record
 - [ ] The notification email is readable on a phone and replies to the buyer
 - [ ] WhatsApp buttons are visible and open the right account

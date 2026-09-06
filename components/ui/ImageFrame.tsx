@@ -12,7 +12,7 @@ import { useIsDesktop } from "@/lib/hooks";
  *  - `reveal`: clip-path wipe + inner scale when scrolled into view
  *  - `parallax`: gentle vertical drift on desktop (disabled on mobile
  *     and for reduced-motion users)
- *  - `grade`: the shared SILVORA colour treatment (see `graded` in
+ *  - `grade`: the shared Corn Fodder colour treatment (see `graded` in
  *     styles/globals.css). On by default; pass false to opt out.
  */
 
@@ -27,7 +27,7 @@ interface ImageFrameProps {
   /** Object position, e.g. "50% 30%". */
   position?: string;
   aspect?: string;
-  /** Opt out of the shared SILVORA grade. */
+  /** Opt out of the shared Corn Fodder grade. */
   grade?: boolean;
   quality?: 60 | 70 | 75 | 85;
   style?: CSSProperties;

@@ -1,4 +1,4 @@
--- SILVORA — admin panel schema
+-- Corn Fodder — admin panel schema
 -- ---------------------------------------------------------------------
 -- Paste this into the Supabase SQL editor once, then set SUPABASE_URL
 -- and SUPABASE_SERVICE_ROLE_KEY in the deployment environment.
@@ -14,7 +14,7 @@
 -- =====================================================================
 
 create table if not exists public.quote_requests (
-  -- The human-facing reference, e.g. "SLV-260906-4KX2". It is the
+  -- The human-facing reference, e.g. "CF-260906-4KX2". It is the
   -- primary key so a retried submission with the same reference cannot
   -- create a duplicate row: the store uses ON CONFLICT DO NOTHING.
   reference     text primary key,

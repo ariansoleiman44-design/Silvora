@@ -1,4 +1,4 @@
-# SILVORA admin panel
+# Corn Fodder admin panel
 
 A staff tool at `/admin`: an inbox for quote requests, and an editor for
 product content. The public site works completely without it — nothing

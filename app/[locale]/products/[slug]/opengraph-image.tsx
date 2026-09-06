@@ -12,7 +12,7 @@ import { siteConfig } from "@/data/site-config";
  * Never a price, never a rating.
  */
 
-export const alt = "SILVORA corn silage";
+export const alt = "Corn Fodder corn silage";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

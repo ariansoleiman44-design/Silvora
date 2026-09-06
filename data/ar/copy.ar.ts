@@ -28,7 +28,7 @@ import type { Copy } from "@/data/copy";
  * technical documents use them, and a quantity read back over the phone
  * must match the invoice. See `intlLocale` in lib/i18n.ts.
  *
- * Brand: SILVORA stays in Latin script inside Arabic sentences.
+ * Brand: Corn Fodder stays in Latin script inside Arabic sentences.
  *
  * Machine values (option `value`, sort keys, filter keys) are NOT
  * translated — only the labels a person reads.
@@ -40,7 +40,7 @@ import type { Copy } from "@/data/copy";
 
 export const copyAr: Copy = {
   seo: {
-    defaultTitle: "SILVORA — بالات سيلاج ذرة مغلّفة وتوريد سيلاج بالجملة",
+    defaultTitle: "Corn Fodder — بالات سيلاج ذرة مغلّفة وتوريد سيلاج بالجملة",
     defaultDescription:
       "بالات سيلاج ذرة مغلّفة وممتازة لقطعان الحليب واللحم — صيغ دائرية ومربّعة ومدمجة. طلبات المزارع والتوريد التجاري واستفسارات التصدير، مع توصيل مخطّط حول عملك. يُسعَّر كل طلب على حدة.",
   },
@@ -62,12 +62,12 @@ export const copyAr: Copy = {
     quality: {
       title: "الجودة — من المحصول إلى المعاينة",
       description:
-        "كيف يُزرع سيلاج SILVORA ويُحصد ويُفرم ويُكبس ويُغلَّف ويتخمّر ويُخزَّن ويُعايَن ويُنقل — وكيف تقرأ تحليل الدفعة.",
+        "كيف يُزرع سيلاج Corn Fodder ويُحصد ويُفرم ويُكبس ويُغلَّف ويتخمّر ويُخزَّن ويُعايَن ويُنقل — وكيف تقرأ تحليل الدفعة.",
     },
     process: {
       title: "عمليتنا — من الحقل إلى العلف",
       description:
-        "زراعة، وحصاد، وفرم، وكبس، وتغليف، وتخمّر، وتوصيل، وتغذية. الخطوات الثماني التي تمرّ بها كل بالة سيلاج من SILVORA.",
+        "زراعة، وحصاد، وفرم، وكبس، وتغليف، وتخمّر، وتوصيل، وتغذية. الخطوات الثماني التي تمرّ بها كل بالة سيلاج من Corn Fodder.",
     },
     logistics: {
       title: "اللوجستيات — طلبات المزارع والتجارة والتصدير",
@@ -77,12 +77,12 @@ export const copyAr: Copy = {
     about: {
       title: "من نحن — احترام للمحصول وللقطيع وللمزارع",
       description:
-        "وُجدت SILVORA لتجعل سيلاج الذرة الممتاز هو القاعدة لا الاستثناء. مهمّتنا ومنهجنا وفلسفتنا في الجودة ورؤيتنا.",
+        "وُجدت Corn Fodder لتجعل سيلاج الذرة الممتاز هو القاعدة لا الاستثناء. مهمّتنا ومنهجنا وفلسفتنا في الجودة ورؤيتنا.",
     },
     contact: {
       title: "تواصل مع المبيعات",
       description:
-        "المبيعات والعيّنات والمعاينة واللوجستيات — تواصل مع فريق SILVORA هاتفيًا أو عبر واتساب أو البريد الإلكتروني أو نموذج التواصل.",
+        "المبيعات والعيّنات والمعاينة واللوجستيات — تواصل مع فريق Corn Fodder هاتفيًا أو عبر واتساب أو البريد الإلكتروني أو نموذج التواصل.",
     },
     quote: {
       title: "اطلب عرض سعر — بالات سيلاج الذرة",
@@ -92,7 +92,7 @@ export const copyAr: Copy = {
     results: {
       title: "النتائج — سيلاج الذرة في قطعان عاملة",
       description:
-        "كيف تُطعم العمليات سيلاج SILVORA: القطيع، والتحدّي، وخطة التوريد، والنتيجة المقاسة.",
+        "كيف تُطعم العمليات سيلاج Corn Fodder: القطيع، والتحدّي، وخطة التوريد، والنتيجة المقاسة.",
     },
     privacy: { title: "سياسة الخصوصية", description: "كيف نتعامل مع البيانات التي تشاركها معنا." },
     terms: { title: "شروط البيع", description: "الشروط المطبّقة على عروض الأسعار والطلبات والتوصيل." },
@@ -233,7 +233,7 @@ export const copyAr: Copy = {
   },
 
   why: {
-    eyebrow: "لماذا SILVORA",
+    eyebrow: "لماذا Corn Fodder",
     headline: ["الفرق", "في التفاصيل."],
     intro: "لا شعارات عن كوننا الأفضل. فقط القرارات التي تصنع بالة أفضل، واحدًا بعد الآخر.",
     items: [
@@ -744,7 +744,7 @@ export const copyAr: Copy = {
   about: {
     eyebrow: "من نحن",
     headline: ["احترام للمحصول.", "واحترام للقطيع."],
-    intro: "وُجدت SILVORA لتجعل سيلاج الذرة الممتاز هو القاعدة لا الاستثناء.",
+    intro: "وُجدت Corn Fodder لتجعل سيلاج الذرة الممتاز هو القاعدة لا الاستثناء.",
     manifesto: [
       { title: "احترام للمحصول", text: "النبات أنجز العمل الصعب. ومهمّتنا ألا نُهدر منه غرامًا." },
       { title: "احترام للماشية", text: "الحيوانات تأكل ما نصنعه كل يوم. والثبات واجب، لا ميزة." },
@@ -826,7 +826,7 @@ export const copyAr: Copy = {
   processPage: {
     eyebrow: "عمليتنا",
     headline: ["من الحقل", "إلى العلف."],
-    intro: "الخطوات الثماني التي تمرّ بها كل بالة من SILVORA، بالترتيب، في كل مرة.",
+    intro: "الخطوات الثماني التي تمرّ بها كل بالة من Corn Fodder، بالترتيب، في كل مرة.",
   },
 
   notFound: {

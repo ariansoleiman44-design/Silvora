@@ -48,7 +48,7 @@ export function QuoteDrawer() {
     >
       {q.items.length === 0 ? (
         <div className="flex h-full min-h-[40vh] flex-col items-center justify-center text-center">
-          <LogoSymbol tone="dark" ribColor="#f5f1e7" className="h-14 w-14 opacity-30" />
+          <LogoSymbol className="h-14 w-14 opacity-30" />
           <p className="display-xs mt-6">{t.drawerEmpty[0]}</p>
           <p className="mt-2 max-w-xs text-sm text-ink/60">{t.drawerEmpty[1]}</p>
           <Button href="/products" variant="outline-dark" size="sm" className="mt-8" onClick={q.close}>

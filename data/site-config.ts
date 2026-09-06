@@ -45,7 +45,7 @@ export interface ServiceArea {
 
 /**
  * Registered company identity. Kept deliberately separate from the
- * brand: SILVORA is what customers read, the legal entity is what
+ * brand: Corn Fodder is what customers read, the legal entity is what
  * belongs on documents.
  *
  * `legalName` should appear ONLY in:
@@ -71,9 +71,9 @@ export interface LegalIdentity {
 
 export const siteConfig = {
   /* ---------------------------------------------------------- Brand */
-  brandName: "SILVORA",
-  /** Used in sentences, e.g. "Silvora bales". */
-  brandNameDisplay: "Silvora",
+  brandName: "Corn Fodder",
+  /** Used in sentences, e.g. "Corn Fodder bales". */
+  brandNameDisplay: "Corn Fodder",
   descriptor: "Premium Corn Silage",
   tagline: "Harvested for Performance.",
   /** Short statement used in the footer and Open Graph description. */
@@ -90,7 +90,7 @@ export const siteConfig = {
    * cosmetic one. See PRE-LAUNCH.md section 2.
    */
   legal: {
-    name: "Silvora", // ← registered entity name goes here
+    name: "Corn Fodder", // ← registered entity name goes here
     copyrightName: "", // empty → falls back to the brand name
     registrationNumber: "",
     taxNumber: "",
@@ -211,8 +211,8 @@ export const siteConfig = {
 
   /* ------------------------------------------------------------ SEO */
   seo: {
-    titleTemplate: "%s — SILVORA",
-    defaultTitle: "SILVORA — Wrapped Corn Silage Bales & Bulk Maize Silage Supply",
+    titleTemplate: "%s — Corn Fodder",
+    defaultTitle: "Corn Fodder — Wrapped Corn Silage Bales & Bulk Maize Silage Supply",
     defaultDescription:
       "Premium wrapped corn silage bales for dairy and beef herds — round, square and compact formats. Farm orders, commercial supply and export enquiries, with delivery planned around your operation. Pricing quoted per order.",
     /** Path under /public. Replace with your own 1200×630 image. */

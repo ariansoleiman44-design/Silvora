@@ -48,7 +48,7 @@ export const faqs: Faq[] = [
   },
   {
     category: "product-data",
-    question: "Can SILVORA provide a batch analysis?",
+    question: "Can Corn Fodder provide a batch analysis?",
     answer:
       "Laboratory analysis is issued per batch rather than as a fixed product figure, because a batch is what a laboratory can actually measure. Tick \"I need laboratory / batch specifications\" in your request and we will send what is available for the batch you would receive.",
   },

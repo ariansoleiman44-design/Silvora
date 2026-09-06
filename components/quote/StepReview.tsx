@@ -87,7 +87,7 @@ export function StepReview({
         {/* Print-only masthead */}
         <div className="mb-6 hidden items-center justify-between border-b border-ink/20 pb-4 print:flex">
           <div className="flex items-center gap-3">
-            <LogoSymbol tone="dark" ribColor="#f5f1e7" className="h-8 w-8" />
+            <LogoSymbol className="h-8 w-8" />
             <span className="font-display text-2xl tracking-[0.08em]">{siteConfig.brandName}</span>
           </div>
           <div className="text-end">

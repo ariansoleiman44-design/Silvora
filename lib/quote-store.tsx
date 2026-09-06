@@ -37,13 +37,16 @@ import { createReference } from "@/lib/quote-service";
  * lib/quote-service.ts. This is a plain reducer plus a context: no state
  * library, no persistence library.
  *
- * Storage keys are versioned. `silvora.quote.v1` (a bare item list from
- * V2 of the site) is migrated on first load and then left alone.
+ * Storage keys are versioned AND brand-namespaced. They moved from
+ * `silvora.*` to `cornfodder.*` with the rename; a basket saved under
+ * the old name is not read back, which is correct — the keys are per
+ * origin and nothing was ever live under the old brand.
  */
 
-const STORAGE_KEY = "silvora.quote.v2";
-const LEGACY_KEY = "silvora.quote.v1";
-const SAVED_KEY = "silvora.saved.v1";
+const STORAGE_KEY = "cornfodder.quote.v2";
+/** A bare item list from V2 of the site, migrated on first load. */
+const LEGACY_KEY = "cornfodder.quote.v1";
+const SAVED_KEY = "cornfodder.saved.v1";
 const MAX_QTY = 9999;
 
 const uid = () => Math.random().toString(36).slice(2, 10);

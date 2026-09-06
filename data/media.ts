@@ -22,7 +22,7 @@
  *
  * Do NOT bake colour grading into the source files. The `graded`
  * treatment in styles/globals.css is what makes mixed material read as
- * one SILVORA shoot, and it stays applied to owned photography too.
+ * one Corn Fodder shoot, and it stays applied to owned photography too.
  *
  * CURATION RULE — every frame must be unmistakably *this* business:
  * wrapped silage bales, maize, forage machinery, the herds that eat it.
@@ -53,7 +53,7 @@ export interface MediaAsset {
   /** e.g. "Unsplash License", "All rights reserved". */
   license?: string;
   copyright?: string;
-  /** True once this is SILVORA's own photography. */
+  /** True once this is Corn Fodder's own photography. */
   owned?: boolean;
   /** Focal point 0–1 for art-directed cropping, e.g. [0.5, 0.35]. */
   focalPoint?: [number, number];
