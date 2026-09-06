@@ -90,9 +90,12 @@ function unsplash(id: string, opts: UnsplashOptions = {}): string {
 export const media = {
   /* ---------------------------------------------------------------- Heroes */
   homeHero: {
-    src: unsplash("1700241739138-4ec27c548035", { w: 2400 }),
-    alt: "Golden corn field at harvest with a forage harvester working in the distance",
-    ratio: 3 / 2,
+    // The hero should show the product, not the crop: a wrapped silage
+    // bale is what the business sells. Cropped low and wide so the bales
+    // sit in the lower third, clear of the headline.
+    src: unsplash("1641449156668-5b5214c4c966", { w: 2400, ar: "16:9", fp: [0.5, 0.62], zoom: 1.1 }),
+    alt: "Wrapped corn silage bales across a field under a dramatic sky",
+    ratio: 16 / 9,
   },
   productsHero: {
     src: unsplash("1641449156668-5b5214c4c966", { w: 2400 }),

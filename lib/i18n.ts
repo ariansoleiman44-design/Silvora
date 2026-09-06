@@ -51,12 +51,28 @@ export function localePath(path: string, locale: LocaleCode = defaultLocale): st
   return `/${locale}${clean}`;
 }
 
-/** Strip a locale prefix back to the canonical, unprefixed path. */
+/**
+ * Strip a locale prefix back to the canonical, unprefixed path.
+ *
+ *   "/ar/products"  → { locale: "ar",  path: "/products" }
+ *   "/ckb"          → { locale: "ckb", path: "/" }
+ *   "/products"     → { locale: "en",  path: "/products" }
+ *
+ * Matched against the real locale list rather than a length pattern: an
+ * earlier version tested /^\/([a-z]{2})\b/ and silently failed on the
+ * three-letter codes (ckb, kmr), so switching language from a Kurdish
+ * page produced "/ar/ckb".
+ */
 export function stripLocale(pathname: string): { locale: LocaleCode; path: string } {
-  const match = /^\/([a-z]{2})(\/.*)?$/i.exec(pathname);
-  const candidate = match?.[1]?.toLowerCase();
-  if (candidate && isActiveLocale(candidate) && candidate !== defaultLocale) {
-    return { locale: candidate, path: match?.[2] || "/" };
+  const segments = (pathname || "/").split("/");
+  const candidate = segments[1]?.toLowerCase();
+
+  for (const locale of activeLocales) {
+    if (locale === defaultLocale) continue;
+    if (candidate === locale) {
+      const rest = segments.slice(2).join("/");
+      return { locale, path: rest ? `/${rest}` : "/" };
+    }
   }
   return { locale: defaultLocale, path: pathname || "/" };
 }

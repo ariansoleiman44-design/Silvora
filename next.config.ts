@@ -49,6 +49,13 @@ function contentSecurityPolicy(isDev: boolean): string {
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  /*
+   * Testing the dev server from a phone on the same network is blocked
+   * by default. Set NEXT_DEV_ORIGIN to your machine's LAN address to
+   * allow it — e.g. NEXT_DEV_ORIGIN=192.168.100.206 npm run dev.
+   * Development only; it has no effect on a production build.
+   */
+  allowedDevOrigins: process.env.NEXT_DEV_ORIGIN ? [process.env.NEXT_DEV_ORIGIN] : [],
   images: {
     // Prototype photography is served from Unsplash. When you replace the
     // imagery (see data/media.ts) remove this pattern and the matching
