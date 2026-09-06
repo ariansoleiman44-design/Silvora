@@ -1,0 +1,530 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   SILVORA design tokens
+   Change brand colours, fonts and easing here. Tailwind v4 turns every
+   --color-* token into utilities (bg-forest, text-gold, border-stone …).
+------------------------------------------------------------------- */
+@theme {
+  --color-forest: #102a20;
+  --color-forest-deep: #0b1f17;
+  --color-soil: #161a16;
+  --color-ink: #0d100e;
+  --color-gold: #c9a45c;
+  --color-gold-light: #e0c482;
+  --color-wheat: #e5d3a6;
+  --color-leaf: #5f7f53;
+  --color-cream: #f5f1e7;
+  --color-cream-deep: #ece5d3;
+  --color-stone: #d8d5cb;
+  --color-stone-dark: #a39f91;
+  --color-white: #ffffff;
+
+  --font-display: var(--font-display), "Iowan Old Style", Georgia, serif;
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-luxe: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --breakpoint-xs: 26.25rem; /* 420px */
+  --breakpoint-3xl: 112rem; /* 1792px */
+
+  --animate-line-grow: line-grow 1.6s var(--ease-luxe) infinite;
+  --animate-fade-in: fade-in 0.8s var(--ease-luxe) both;
+  --animate-draw: draw 1.4s var(--ease-luxe) both;
+  --animate-sun-drift: sun-drift 14s ease-in-out infinite alternate;
+  --animate-rise-in: rise-in 1s var(--ease-luxe) both;
+  --animate-rise-line: rise-line 1.2s var(--ease-luxe) both;
+  --animate-hero-zoom: hero-zoom 2.6s var(--ease-luxe) both;
+
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes rise-line {
+    from { transform: translateY(105%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes hero-zoom {
+    from { transform: scale(1.14); }
+    to { transform: scale(1); }
+  }
+  --animate-spin-slow: spin 40s linear infinite;
+
+  @keyframes sun-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(-8%, 10%, 0) scale(1.15); }
+  }
+
+  @keyframes line-grow {
+    0% { transform: scaleY(0); transform-origin: top; }
+    45% { transform: scaleY(1); transform-origin: top; }
+    55% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+}
+
+/* ------------------------------------------------------------------
+   Base
+------------------------------------------------------------------- */
+@layer base {
+  :root {
+    --header-h: 5.25rem;
+    --header-h-compact: 4rem;
+    --gutter: clamp(1.25rem, 4vw, 4.5rem);
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+    font-feature-settings: "ss01", "cv11";
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-gold) 55%, transparent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 3px;
+  }
+
+  img, video { display: block; }
+
+  button { cursor: pointer; }
+
+  h1, h2, h3, h4 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+}
+
+/* Grids without an explicit column template get one minmax(0,1fr)
+   column, so long nowrap content can never widen the page. Utilities
+   like grid-cols-2 still override this. */
+@layer components {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ------------------------------------------------------------------
+   Typography scale (fluid). Headlines use the display serif.
+------------------------------------------------------------------- */
+@utility display-xl {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(3.05rem, 9.2vw, 9.25rem);
+  line-height: 0.92;
+  letter-spacing: -0.015em;
+}
+@utility display-lg {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 6vw, 6.25rem);
+  line-height: 0.96;
+  letter-spacing: -0.015em;
+}
+@utility display-md {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 4vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+@utility display-sm {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.005em;
+}
+@utility display-xs {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.25rem, 1.7vw, 1.75rem);
+  line-height: 1.15;
+}
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+@utility lead {
+  font-size: clamp(1.0625rem, 1.35vw, 1.375rem);
+  line-height: 1.5;
+  font-weight: 400;
+}
+@utility body-lg {
+  font-size: clamp(1rem, 1.1vw, 1.125rem);
+  line-height: 1.65;
+}
+@utility mono-num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ------------------------------------------------------------------
+   Layout helpers
+------------------------------------------------------------------- */
+@utility container-x {
+  width: 100%;
+  max-width: 100rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+@utility section-y {
+  padding-block: clamp(4.5rem, 9vw, 9rem);
+}
+@utility section-y-sm {
+  padding-block: clamp(3rem, 6vw, 6rem);
+}
+@utility hairline {
+  border-color: color-mix(in srgb, currentColor 16%, transparent);
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+/* Skip rendering work for far-offscreen sections (big win on long pages).
+   Anchored scrolling and in-view reveals keep working. */
+@utility cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Film-grain overlay for dark cinematic sections */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.07;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+}
+
+/* Subtle "field rows" pattern: diagonal hairlines like drilled crop rows */
+@utility field-rows {
+  background-image: repeating-linear-gradient(
+    115deg,
+    color-mix(in srgb, currentColor 7%, transparent) 0 1px,
+    transparent 1px 22px
+  );
+}
+
+/* Underline that grows from the start edge on hover */
+@utility link-line {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    bottom: -0.25em;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s var(--ease-luxe);
+  }
+  &:hover::after, &:focus-visible::after, &[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+  [dir="rtl"] &::after { transform-origin: right; }
+}
+
+/* Editorial image frame: reveal from bottom with inner scale */
+@utility img-zoom {
+  overflow: hidden;
+  & img { transition: transform 1.2s var(--ease-luxe); }
+  &:hover img { transform: scale(1.04); }
+}
+
+/* Native select styling reset */
+@utility select-reset {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: none;
+}
+
+/* Hide the number spinner but keep it accessible */
+@utility text-gradient-gold {
+  background: linear-gradient(100deg, var(--color-wheat), var(--color-gold) 60%, var(--color-gold-light));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ------------------------------------------------------------------
+   SILVORA GRADE
+   --------------------------------------------------------------------
+   One colour treatment applied to every photograph so images from
+   different sources read as a single commissioned shoot.
+
+   TUNE: change the tokens below — nothing else.
+   DISABLE GLOBALLY: set --grade-filter: none and all three opacities
+   to 0 in the :root block.
+   DISABLE PER IMAGE: add the `grade-off` class, or pass grade={false}
+   to <ImageFrame />.
+
+   Deliberately gentle: no brightness reduction, no multiply blend, and
+   the vignette rides on soft-light so blacks are never crushed on OLED
+   phones. Mobile gets a lighter hand again (media query below).
+------------------------------------------------------------------- */
+@layer base {
+  :root {
+    --grade-filter: saturate(0.88) contrast(1.05);
+    --grade-tint: 16 42 32; /* forest — hue shift, `color` blend */
+    --grade-tint-opacity: 0.15;
+    --grade-wash: 224 196 130; /* gold — highlight warmth, `soft-light` */
+    --grade-wash-opacity: 0.26;
+    --grade-vignette-opacity: 0.24;
+  }
+
+  /* Phones / OLED: lighter tint, much lighter vignette. */
+  @media (max-width: 48rem) {
+    :root {
+      --grade-tint-opacity: 0.11;
+      --grade-wash-opacity: 0.2;
+      --grade-vignette-opacity: 0.12;
+    }
+  }
+}
+
+/* Host element must already be positioned (relative/absolute) — the
+   utility deliberately does not set `position` so it can be applied to
+   absolutely-positioned image wrappers. */
+@utility graded {
+  isolation: isolate;
+
+  & :is(img, video) {
+    filter: var(--grade-filter);
+  }
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* Hue pull toward forest */
+  &::before {
+    z-index: 1;
+    background: rgb(var(--grade-tint));
+    mix-blend-mode: color;
+    opacity: var(--grade-tint-opacity);
+  }
+
+  /* Warm key light + soft vignette */
+  &::after {
+    z-index: 2;
+    background:
+      radial-gradient(120% 90% at 22% 10%, rgb(var(--grade-wash) / var(--grade-wash-opacity)), transparent 62%),
+      radial-gradient(118% 118% at 50% 48%, transparent 54%, rgb(0 0 0 / var(--grade-vignette-opacity)));
+    mix-blend-mode: soft-light;
+  }
+}
+
+/* Opt one image out of the grade without touching the tokens. */
+@utility grade-off {
+  & :is(img, video) {
+    filter: none;
+  }
+  &::before,
+  &::after {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   PRINT — the quote request as an office document
+   --------------------------------------------------------------------
+   Anything marked `data-print-root` becomes the whole printed page:
+   branding, reference, buyer, products, requirements, delivery, notes.
+   Navigation, footer, imagery, sticky bars and animation are stripped.
+
+   Implemented with `visibility` rather than `display:none` so a single
+   attribute controls it without every ancestor needing a class.
+------------------------------------------------------------------- */
+@utility no-print {
+  @media print {
+    display: none !important;
+  }
+}
+
+@media print {
+  @page {
+    margin: 16mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Hide everything, then reveal the print root and its contents. */
+  body * {
+    visibility: hidden;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  [data-print-root],
+  [data-print-root] * {
+    visibility: visible;
+  }
+
+  [data-print-root] {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* No decorative imagery or fills on paper. */
+  [data-print-root] img,
+  [data-print-root] video,
+  [data-print-root] [aria-hidden="true"]:empty {
+    display: none !important;
+  }
+
+  /* Keep a section, an order line or a label/value pair from being
+     split across a page break. */
+  [data-print-root] section,
+  [data-print-root] li,
+  [data-print-root] dl > div {
+    break-inside: avoid;
+  }
+
+  [data-print-root] h2,
+  [data-print-root] h3 {
+    break-after: avoid;
+  }
+
+  /* Long free-text notes wrap instead of running off the page. */
+  [data-print-root] p,
+  [data-print-root] dd {
+    overflow-wrap: anywhere;
+    orphans: 2;
+    widows: 2;
+  }
+
+  /* Links print as text — a URL in brackets is noise on paper. */
+  [data-print-root] a {
+    text-decoration: none;
+    color: inherit;
+  }
+}
+
+/* ------------------------------------------------------------------
+   ARABIC / RTL
+   --------------------------------------------------------------------
+   Layout mirroring needs no work: components use logical properties
+   (ps-/pe-/ms-/me-/start-/end-) throughout and directional icons carry
+   `rtl:-scale-x-100`. What changes here is type.
+
+   Arabic has no serif/sans distinction in the Latin sense, so the
+   pairing is chosen for the same *voice*: Amiri (a Naskh face with an
+   editorial, slightly classical weight) answers Instrument Serif, and
+   IBM Plex Sans Arabic answers Manrope.
+
+   Swapping the two variables is all it takes — every component reads
+   --font-display / --font-sans and never names a typeface.
+------------------------------------------------------------------- */
+[dir="rtl"] {
+  --font-display: var(--font-display-ar), "Amiri", "Geeza Pro", "Noto Naskh Arabic", serif;
+  --font-sans: var(--font-sans-ar), "IBM Plex Sans Arabic", "SF Arabic", "Noto Sans Arabic", sans-serif;
+}
+
+[dir="rtl"] body {
+  /* Arabic sits lower and needs more room between lines than Latin at
+     the same size; without this the display sizes feel cramped. */
+  line-height: 1.75;
+}
+
+/* Arabic display type has no small-caps tradition and letter-spaced
+   uppercase is meaningless in an unicase script — undo both. */
+[dir="rtl"] .eyebrow {
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 600;
+}
+
+[dir="rtl"] .display-xl,
+[dir="rtl"] .display-lg,
+[dir="rtl"] .display-md,
+[dir="rtl"] .display-sm,
+[dir="rtl"] .display-xs {
+  letter-spacing: 0;
+  /* Naskh needs more vertical space than a tight Latin display setting. */
+  line-height: 1.25;
+}
+
+[dir="rtl"] .display-xl {
+  line-height: 1.15;
+}
+
+/* `uppercase` is a no-op in Arabic but still triggers font synthesis in
+   some engines — neutralise it inside RTL. */
+[dir="rtl"] .uppercase {
+  text-transform: none;
+}
+
+/* Italic is a Latin convention. Arabic has no true italic, and faux
+   obliquing a Naskh face looks broken. */
+[dir="rtl"] .italic {
+  font-style: normal;
+}
+
+/* Numbers, references and measurements stay LTR inside Arabic text so
+   "SLV-260906-A7F4" and "700 – 800 كغم" read correctly. */
+[dir="rtl"] .mono-num {
+  direction: ltr;
+  unicode-bidi: embed;
+  display: inline-block;
+}

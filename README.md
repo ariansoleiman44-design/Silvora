@@ -494,4 +494,3 @@ removing it would let the site mislead a real buyer.
 
 © SILVORA. Prototype photography via Unsplash (free licence) — replace
 before commercial launch.
-# Silvora
