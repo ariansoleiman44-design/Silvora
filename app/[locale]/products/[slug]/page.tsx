@@ -10,9 +10,10 @@ import { RelatedProducts } from "@/components/products/RelatedProducts";
 import { BatchInformation } from "@/components/products/BatchInformation";
 import { QuoteCTA } from "@/components/home/QuoteCTA";
 import { getRelatedProducts, products } from "@/data/products";
-import { getDictionary, getCopy } from "@/lib/dictionary";
+import { getCopy } from "@/lib/dictionary";
 import { setRequestLocale } from "@/lib/locale-server";
 import { getDictionaryFor } from "@/data/dictionaries";
+import { getProductsFor } from "@/lib/server/product-overrides";
 import { isActiveLocale } from "@/lib/i18n";
 import { breadcrumbJsonLd, buildMetadata, productJsonLd } from "@/lib/seo";
 import { visibleBatches } from "@/lib/spec-sheet";
@@ -64,8 +65,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ProductPage({ params }: Params) {
   const { slug, locale } = await params;
   setRequestLocale(locale);
-  const dict = getDictionary();
-  const raw = dict.products.find((p) => p.slug === slug);
+  // The catalogue with any admin edits layered on. Falls back to the
+  // committed data when no database is configured, so this page renders
+  // identically with or without the panel.
+  const catalogue = await getProductsFor(locale as never);
+  const raw = catalogue.find((p) => p.slug === slug);
   if (!raw) notFound();
 
   // Unverified figures are removed before the product crosses into any
@@ -76,7 +80,7 @@ export default async function ProductPage({ params }: Params) {
 
   // Related products come from the same translated catalogue.
   const related = getRelatedProducts(product, 3).map(
-    (r) => dict.products.find((p) => p.slug === r.slug) ?? r,
+    (r) => catalogue.find((p) => p.slug === r.slug) ?? r,
   );
   const crumbs = [
     { name: copy.product.breadcrumbHome, href: "/" },

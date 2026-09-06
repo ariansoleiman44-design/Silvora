@@ -2,7 +2,7 @@
   "name": "silvora",
   "version": "1.0.0",
   "private": true,
-  "description": "SILVORA \u2014 premium corn silage bales. Next.js App Router site.",
+  "description": "SILVORA — premium corn silage bales. Next.js App Router site.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,7 +12,8 @@
     "validate:data": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validate-data.mts",
     "launch:audit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/launch-audit.mts",
     "preflight": "npm run validate:data && npm run typecheck && npm run lint && npm run launch:audit",
-    "i18n:review": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/i18n-review.mts"
+    "i18n:review": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/i18n-review.mts",
+    "admin:password": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/admin-password.mts"
   },
   "dependencies": {
     "framer-motion": "^12.43.0",

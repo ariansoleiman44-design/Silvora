@@ -86,6 +86,19 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        /*
+         * The admin panel: never indexed, never cached. The proxy sets
+         * X-Robots-Tag too; this covers the route handlers under /admin
+         * (sign-out, CSV export) whichever layer answers first, and the
+         * no-store keeps a CDN from holding a page of buyer data.
+         */
+        source: "/admin/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "Cache-Control", value: "no-store, max-age=0" },
+        ],
+      },
+      {
         // The RFQ endpoint must never be cached by a CDN or a browser.
         source: "/api/:path*",
         headers: [

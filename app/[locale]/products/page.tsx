@@ -5,8 +5,9 @@ import { ProductCatalog } from "@/components/products/ProductCatalog";
 import { QuoteCTA } from "@/components/home/QuoteCTA";
 import { JsonLd } from "@/components/seo/JsonLd";
 
+import { getProductsFor } from "@/lib/server/product-overrides";
 import { setRequestLocale } from "@/lib/locale-server";
-import { getCopy, getDictionary } from "@/lib/dictionary";
+import { getCopy } from "@/lib/dictionary";
 import { isActiveLocale } from "@/lib/i18n";
 import { breadcrumbJsonLd, buildMetadata } from "@/lib/seo";
 
@@ -36,7 +37,7 @@ export default async function ProductsPage({
   // point. Next renders route segments independently, so the
   // layout setting it is not enough — each page must too.
   setRequestLocale(locale);
-  const { products } = getDictionary();
+  const products = await getProductsFor(locale as never);
   const copy = getCopy();
   const t = copy.products;
   return (

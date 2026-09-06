@@ -63,7 +63,10 @@ if (!host) {
 /* ------------------------------------------------------------------ */
 
 const externalEndpoint = env("NEXT_PUBLIC_FORMS_ENDPOINT");
-const store = env("QUOTE_WEBHOOK_URL");
+// The database takes priority over the webhook in resolveStore(), so it
+// is checked first here too.
+const supabase = env("SUPABASE_URL") && env("SUPABASE_SERVICE_ROLE_KEY");
+const store = supabase || env("QUOTE_WEBHOOK_URL");
 const notifiers = [
   env("QUOTE_EMAIL_API_KEY") && env("QUOTE_EMAIL_TO") && env("QUOTE_EMAIL_FROM") ? "email" : "",
   env("QUOTE_NOTIFY_WEBHOOK_URL") ? "notify-webhook" : "",
@@ -79,7 +82,10 @@ if (!siteConfig.features.quoteEnabled) {
 } else if (externalEndpoint) {
   ready("Quote delivery", `external endpoint ${externalEndpoint}`);
 } else if (store) {
-  ready("Quote delivery", `persisted via QUOTE_WEBHOOK_URL${notifiers.length ? `, notifying: ${notifiers.join(", ")}` : ""}`);
+  ready(
+    "Quote delivery",
+    `persisted via ${supabase ? "Supabase" : "QUOTE_WEBHOOK_URL"}${notifiers.length ? `, notifying: ${notifiers.join(", ")}` : ""}`,
+  );
 } else if (notifiers.length) {
   warning(
     "Quote delivery",
@@ -242,6 +248,46 @@ warning(
   "Translation review",
   "no translated locale has been checked by a native speaker. Run npm run i18n:review and have docs/AR-REVIEW.md and docs/CKB-REVIEW.md read before launch — agricultural terminology especially.",
 );
+
+/* ------------------------------------------------------------------ */
+/* Admin panel                                                         */
+/* ------------------------------------------------------------------ */
+
+const adminHash = env("ADMIN_PASSWORD_HASH");
+const adminSecret = env("ADMIN_SESSION_SECRET");
+
+if (!adminHash && !adminSecret) {
+  // Not a blocker. The public site is complete without the panel, and
+  // shipping without it is a legitimate choice.
+  warning(
+    "Admin panel",
+    "not configured — /admin will show a sign-in page that cannot accept a password. Run npm run admin:password to enable it.",
+  );
+} else if (!adminHash || !adminSecret) {
+  blocker(
+    "Admin panel",
+    `half-configured — ${adminHash ? "ADMIN_SESSION_SECRET" : "ADMIN_PASSWORD_HASH"} is missing. Nobody can sign in.`,
+  );
+} else if (!/^scrypt:[0-9a-f]{32,}:[0-9a-f]{64,}$/.test(adminHash)) {
+  blocker("Admin panel", "ADMIN_PASSWORD_HASH is malformed — regenerate it with npm run admin:password");
+} else if (adminSecret.length < 32) {
+  blocker("Admin panel", "ADMIN_SESSION_SECRET is shorter than 32 characters — session cookies are weakly signed");
+} else if (!supabase) {
+  warning("Admin panel", "configured, but no database is connected — every screen will be empty");
+} else {
+  ready("Admin panel", "password and session secret set, database connected");
+}
+
+/*
+ * A secret with a NEXT_PUBLIC_ name is compiled into the browser
+ * bundle. For an admin password hash or a service-role key that is a
+ * full compromise, so it is a blocker rather than a warning.
+ */
+for (const key of ["ADMIN_PASSWORD_HASH", "ADMIN_SESSION_SECRET", "SUPABASE_SERVICE_ROLE_KEY"]) {
+  if (env(`NEXT_PUBLIC_${key}`)) {
+    blocker("Secret exposed to the browser", `NEXT_PUBLIC_${key} is set — anything NEXT_PUBLIC_ ships in the client bundle`);
+  }
+}
 
 if (activeLocales.includes("kmr" as never)) {
   warning(

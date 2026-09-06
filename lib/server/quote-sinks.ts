@@ -1,5 +1,6 @@
 import type { QuoteRequest } from "@/types/quote";
 import { reportError } from "@/lib/observability";
+import { insertRows, isSupabaseConfigured, SupabaseError } from "@/lib/server/supabase";
 
 /**
  * WHERE AN RFQ GOES
@@ -97,7 +98,51 @@ const logStore: QuoteStore = {
   },
 };
 
+/**
+ * Supabase Postgres over its REST API — no SDK, see lib/server/supabase.ts.
+ *
+ * The reference is the primary key, so a retry of the same submission
+ * collides rather than duplicating. PostgREST reports that as 409, and
+ * a 409 here means "this exact RFQ is already stored", which is the
+ * outcome we wanted — so it is a success, not a failure. Any other
+ * error throws and the buyer is told the submission failed.
+ *
+ * The flat columns are extracted for filtering in the admin inbox. The
+ * full request goes into `payload` and is the record of truth.
+ */
+function supabaseStore(): QuoteStore {
+  return {
+    name: "supabase",
+    async save(request) {
+      try {
+        await insertRows("quote_requests", [
+          {
+            reference: request.reference,
+            created_at: request.createdAt,
+            status: "new",
+            order_type: request.orderType,
+            company: request.company || request.buyer.company || "",
+            buyer_name: request.buyer.name ?? "",
+            buyer_email: request.buyer.email ?? "",
+            buyer_phone: request.buyer.phone ?? "",
+            country: request.delivery?.country ?? "",
+            line_count: request.products.length,
+            payload: request,
+          },
+        ]);
+      } catch (error) {
+        // 409 = the reference is already stored. The record exists and
+        // is intact, which is exactly what save() promises.
+        if (error instanceof SupabaseError && error.status === 409) return;
+        throw error;
+      }
+    },
+  };
+}
+
 export function resolveStore(): QuoteStore | null {
+  // Database first: it is the only option the admin panel can read back.
+  if (isSupabaseConfigured()) return supabaseStore();
   const webhook = env("QUOTE_WEBHOOK_URL");
   if (webhook) return webhookStore(webhook);
   if (process.env.NODE_ENV !== "production" && env("QUOTE_STORE") === "log") return logStore;
