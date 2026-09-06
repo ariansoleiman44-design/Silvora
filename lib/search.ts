@@ -1,5 +1,5 @@
 import type { Product } from "@/types/product";
-import { applicationLabels, formatLabels, orderTypeLabels, products as defaultProducts } from "@/data/products";
+import { applicationLabels, formatLabels, orderTypeLabels } from "@/data/product-labels";
 
 /**
  * PRODUCT SEARCH
@@ -33,15 +33,18 @@ function haystack(
 }
 
 /**
- * Search a catalogue. The list is passed in so each locale searches its
- * own translated names — an Arabic buyer typing «مربّعة» must find the
- * square bale, which searching the English catalogue would never do.
+ * Search a catalogue. The list is REQUIRED, not defaulted: each locale
+ * must search its own translated names — an Arabic buyer typing
+ * «مربّعة» must find the square bale, which searching the English
+ * catalogue would never do. This used to default to the English
+ * catalogue, which both made that failure silent and pulled all nine
+ * products into the browser bundle for every visitor.
  */
 export function searchProducts(
   query: string,
-  options: { products?: Product[]; limit?: number; labels?: Parameters<typeof haystack>[1] } = {},
+  options: { products: Product[]; limit?: number; labels?: Parameters<typeof haystack>[1] },
 ): Product[] {
-  const { products = defaultProducts, limit = 6, labels } = options;
+  const { products, limit = 6, labels } = options;
   const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (terms.length === 0) return [];
   return products

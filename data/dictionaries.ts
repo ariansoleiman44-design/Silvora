@@ -1,5 +1,6 @@
 import { copy as copyEn } from "@/data/copy";
-import { products as productsEn, formatLabels, applicationLabels, orderTypeLabels, availabilityLabels } from "@/data/products";
+import { products as productsEn } from "@/data/products";
+import { formatLabels, applicationLabels, orderTypeLabels, availabilityLabels } from "@/data/product-labels";
 import { faqs as faqsEn, faqCategoryLabels } from "@/data/faqs";
 import { processSteps as processStepsEn } from "@/data/process";
 import { comparisonColumns as comparisonColumnsEn, comparisonRows as comparisonRowsEn } from "@/data/comparison";

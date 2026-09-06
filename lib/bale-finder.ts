@@ -1,4 +1,3 @@
-import { products as defaultProducts } from "@/data/products";
 import type { Product } from "@/types/product";
 
 /**
@@ -22,7 +21,13 @@ export interface FinderResult {
   reason: string;
 }
 
-export function recommendBale(a: FinderAnswers, catalogue: Product[] = defaultProducts): FinderResult {
+/*
+ * `catalogue` is REQUIRED. Defaulting it to the English product list
+ * silently returned English names inside a translated page and pulled
+ * the whole catalogue into the browser bundle — BaleFinder is a client
+ * component and already passes its localised list.
+ */
+export function recommendBale(a: FinderAnswers, catalogue: Product[]): FinderResult {
   const find = (slug: string) => catalogue.find((p) => p.slug === slug);
   const pick = (slug: string, reason: string): FinderResult => ({
     product: find(slug) ?? find("premium-round-bale") ?? catalogue[0]!,

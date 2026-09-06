@@ -1,5 +1,5 @@
 import type { Product, ProductBatch, SpecItem } from "@/types/product";
-import { applicationLabels, formatLabels, orderTypeLabels } from "@/data/products";
+import { applicationLabels, formatLabels, orderTypeLabels } from "@/data/product-labels";
 import { siteConfig } from "@/data/site-config";
 import { showDemoValues, visibleSpec, withoutDemo } from "@/lib/demo-policy";
 import { isSafeDocumentUrl } from "@/lib/url-safety";

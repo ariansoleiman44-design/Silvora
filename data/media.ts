@@ -70,6 +70,18 @@ interface UnsplashOptions {
   zoom?: number;
 }
 
+/**
+ * The one external origin the pages fetch from. The root layout
+ * preconnects to it so the LCP image is not delayed by a cold DNS +
+ * TLS handshake, and next.config.ts allows it in the CSP and in
+ * `images.remotePatterns`.
+ *
+ * When owned photography replaces the prototype set, this export goes
+ * away with it and the preconnect, the CSP entry and the remote pattern
+ * all come out together.
+ */
+export const remoteImageOrigin = "https://images.unsplash.com";
+
 function unsplash(id: string, opts: UnsplashOptions = {}): string {
   const params = new URLSearchParams({
     auto: "format",
@@ -84,7 +96,7 @@ function unsplash(id: string, opts: UnsplashOptions = {}): string {
     params.set("fp-y", opts.fp[1].toString());
     if (opts.zoom) params.set("fp-z", opts.zoom.toString());
   }
-  return `https://images.unsplash.com/photo-${id}?${params.toString()}`;
+  return `${remoteImageOrigin}/photo-${id}?${params.toString()}`;
 }
 
 export const media = {

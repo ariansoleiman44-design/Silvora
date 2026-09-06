@@ -21,7 +21,7 @@ import type {
   SupplyMode,
 } from "@/types/quote";
 import type { Product } from "@/types/product";
-import { formatLabels } from "@/data/products";
+import { formatLabels } from "@/data/product-labels";
 import { media } from "@/data/media";
 import { createReference } from "@/lib/quote-service";
 

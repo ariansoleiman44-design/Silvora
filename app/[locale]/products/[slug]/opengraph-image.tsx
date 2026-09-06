@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
-import { getProduct, formatLabels, products } from "@/data/products";
+import { getProduct, products } from "@/data/products";
+import { formatLabels } from "@/data/product-labels";
 import { siteConfig } from "@/data/site-config";
 
 /**

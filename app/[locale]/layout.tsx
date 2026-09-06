@@ -12,6 +12,7 @@ import { MotionProvider } from "@/components/layout/MotionProvider";
 import { LocaleProvider } from "@/lib/locale-client";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import { siteConfig } from "@/data/site-config";
+import { remoteImageOrigin } from "@/data/media";
 import { siteOrigin } from "@/lib/site-url";
 import { activeLocales, getLocale, isActiveLocale, localePath } from "@/lib/i18n";
 import { setRequestLocale } from "@/lib/locale-server";
@@ -35,6 +36,19 @@ import { cn } from "@/lib/utils";
  *
  * The `[dir="rtl"]` block in globals.css swaps the CSS variables, so no
  * component needs to know which script it is rendering.
+ *
+ * PRELOADING IS OFF ON PURPOSE. next/font decides what to preload from
+ * the module graph, not from what the page actually renders: with
+ * `preload: true` an English page emitted preload links for all nine
+ * font files — 390 KB, of which the 337 KB of Arabic never draws a
+ * single glyph — and that download competes with the hero image for
+ * bandwidth on the LCP path.
+ *
+ * With preloading off the @font-face rules still ship in the initial
+ * CSS, so the browser starts each fetch as soon as it lays out text
+ * that needs the face, and only for the script actually on the page.
+ * The cost is one round trip; `display: swap` covers it with the
+ * fallback stacks declared in globals.css.
  */
 const display = Instrument_Serif({
   subsets: ["latin"],
@@ -42,26 +56,33 @@ const display = Instrument_Serif({
   style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
+  preload: false,
 });
 
 const sans = Manrope({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+  preload: false,
 });
 
 const displayAr = Amiri({
   subsets: ["arabic"],
-  weight: ["400", "700"],
+  // Only 400: the site has no bold display type in either script.
+  weight: ["400"],
   variable: "--font-display-ar",
   display: "swap",
+  preload: false,
 });
 
 const sansAr = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
+  // 400/500/600 map to font-normal/-medium/-semibold, which is every
+  // weight the site actually uses. 700 was dead.
+  weight: ["400", "500", "600"],
   variable: "--font-sans-ar",
   display: "swap",
+  preload: false,
 });
 
 /** Pre-render every locale at build time. */
@@ -141,12 +162,23 @@ export default async function LocaleLayout({
     <html
       lang={meta.htmlLang}
       dir={meta.dir}
-      className={cn(display.variable, sans.variable, displayAr.variable, sansAr.variable)}
+      className={cn(meta.dir === "rtl" ? cn(displayAr.variable, sansAr.variable) : cn(display.variable, sans.variable))}
       // Tells Next the smooth scrolling in globals.css is deliberate, so
       // it suppresses it during route transitions instead of warning.
       data-scroll-behavior="smooth"
       id="top"
     >
+      <head>
+        {/*
+          The hero image is the LCP element on most pages and it lives on
+          another origin, so without this the browser pays a DNS lookup
+          and a TLS handshake before the first byte of it moves. Opening
+          the connection while the HTML is still parsing takes that off
+          the critical path. Drop this line when the photography moves
+          to /public — see data/media.ts.
+        */}
+        <link rel="preconnect" href={remoteImageOrigin} crossOrigin="anonymous" />
+      </head>
       <body>
         <LocaleProvider locale={locale} dir={meta.dir} dict={dict}>
           <MotionProvider>

@@ -110,7 +110,21 @@ export function FieldToFeed({ tone = "light" }: { tone?: "light" | "dark" }) {
             return (
               <li key={step.index} className="group w-[clamp(18rem,26vw,24rem)] shrink-0 snap-start">
                 <div className="img-zoom graded relative aspect-[4/5] overflow-hidden bg-stone">
-                  <Image src={img.src} alt={img.alt} fill sizes="26vw" className="object-cover" />
+                  {/*
+                    The card is w-[clamp(18rem,26vw,24rem)], so the plain
+                    "26vw" this used to declare asked for a ~101px file
+                    inside a 288px box on a phone — visibly soft. The
+                    breakpoints are where the clamp actually changes
+                    hands: 26vw equals 18rem at 1108px and 24rem at
+                    1477px.
+                  */}
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    sizes="(min-width: 1477px) 24rem, (min-width: 1108px) 26vw, 18rem"
+                    className="object-cover"
+                  />
                   <div className="absolute inset-x-0 top-0 z-[3] h-1/3 bg-gradient-to-b from-ink/60 to-transparent" aria-hidden />
                   <span className="absolute start-4 top-4 z-[3] font-display text-4xl text-cream">
                     {pad2(step.index)}

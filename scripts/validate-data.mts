@@ -14,7 +14,8 @@
  * Exit code 1 on any ERROR, 0 when only warnings remain, so it can gate
  * a deploy.
  */
-import { products, formatLabels } from "../data/products.ts";
+import { products } from "../data/products.ts";
+import { formatLabels } from "../data/product-labels.ts";
 import { media } from "../data/media.ts";
 import { caseStudies } from "../data/case-studies.ts";
 import { faqs } from "../data/faqs.ts";

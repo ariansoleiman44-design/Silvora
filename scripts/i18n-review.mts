@@ -22,7 +22,7 @@ import { faqs as faqsEn, faqCategoryLabels } from "../data/faqs.ts";
 import { processSteps as processEn } from "../data/process.ts";
 import { comparisonColumns, comparisonRows } from "../data/comparison.ts";
 import { mainNav, footerNav, legalNav } from "../data/navigation.ts";
-import { formatLabels, applicationLabels, orderTypeLabels, availabilityLabels } from "../data/products.ts";
+import { formatLabels, applicationLabels, orderTypeLabels, availabilityLabels } from "../data/product-labels.ts";
 import { locales, activeLocales } from "../data/locales.ts";
 
 import { copyAr } from "../data/ar/copy.ar.ts";

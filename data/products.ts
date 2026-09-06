@@ -1,4 +1,12 @@
-import type { Product, BaleFormat, Application, OrderType } from "@/types/product";
+import type { Product } from "@/types/product";
+
+/*
+ * The label maps live in data/product-labels.ts. They are deliberately
+ * NOT re-exported from here: importing them through this module is what
+ * pulled the whole catalogue into the browser bundle, and a value
+ * re-export through the "@/" alias would also break the audit scripts,
+ * which run under plain Node with no path mapping.
+ */
 
 /**
  * PRODUCT CATALOGUE
@@ -12,27 +20,6 @@ import type { Product, BaleFormat, Application, OrderType } from "@/types/produc
  * pick images from data/media.ts and it appears in the grid, filters,
  * related products, sitemap and Bale Finder automatically.
  */
-
-export const formatLabels: Record<BaleFormat, string> = {
-  round: "Round",
-  square: "Square",
-  compact: "Compact",
-  custom: "Custom",
-};
-
-export const applicationLabels: Record<Application, string> = {
-  dairy: "Dairy",
-  beef: "Beef",
-  "sheep-goats": "Sheep & Goats",
-  general: "General livestock",
-};
-
-export const orderTypeLabels: Record<OrderType, string> = {
-  "small-farm": "Small farm",
-  commercial: "Commercial",
-  bulk: "Bulk",
-  export: "Export",
-};
 
 const demoNutrition = (values: Partial<Record<string, number>> = {}) => [
   { key: "dryMatter", label: "Dry matter", unit: "%", value: values.dryMatter, demo: true },
@@ -454,21 +441,5 @@ export function getRelatedProducts(product: Product, limit = 3): Product[] {
  * Availability states. Wording is deliberately about *supply*, not
  * stock: we never claim a number of bales sitting in a yard.
  */
-export const availabilityLabels: Record<Product["availability"], string> = {
-  available: "Current harvest available",
-  limited: "Limited supply",
-  preorder: "Made to order",
-  seasonal: "Seasonal — enquire for next cut",
-  contact: "Contact for current supply",
-  unavailable: "Not currently available",
-};
 
 /** Dot colour for the availability indicator. */
-export const availabilityTone: Record<Product["availability"], "leaf" | "gold" | "muted"> = {
-  available: "leaf",
-  limited: "gold",
-  preorder: "gold",
-  seasonal: "gold",
-  contact: "muted",
-  unavailable: "muted",
-};

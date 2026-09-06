@@ -6,7 +6,7 @@ import { activeLocales, defaultLocale, getLocale, localePath, type LocaleCode } 
 import { media } from "@/data/media";
 import type { Product } from "@/types/product";
 import type { Faq } from "@/data/faqs";
-import { formatLabels } from "@/data/products";
+import { formatLabels } from "@/data/product-labels";
 
 /**
  * SEO helpers: page metadata and JSON-LD builders.
