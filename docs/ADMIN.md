@@ -23,9 +23,24 @@ SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=…
 ```
 
+**Which key.** Supabase shows more than one, and only one of them
+works here:
+
+| Key | Works? |
+|---|---|
+| `sb_secret_…` (Secret keys) | **yes** — this is the one |
+| `service_role` JWT (legacy projects) | yes, the older name for the same thing |
+| `sb_publishable_…` / `anon` JWT | **no** |
+
+The publishable and anon keys are meant for browsers and respect
+row-level security. This schema enables RLS with **no policies**, so
+those keys can read and write nothing at all — by design. Supabase will
+answer `Secret API key required` if you try.
+
 `SUPABASE_SERVICE_ROLE_KEY` bypasses row-level security. It is a full
-database credential — treat it like a root password, and never give it
-a `NEXT_PUBLIC_` name.
+database credential — treat it like a root password, never paste it into
+a chat, a screenshot or a commit, and never give it a `NEXT_PUBLIC_`
+name.
 
 **Setting these two closes the "no durable storage" launch blocker.**
 Quote requests begin persisting immediately, whether or not anyone ever
