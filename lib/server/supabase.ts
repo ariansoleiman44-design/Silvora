@@ -65,26 +65,50 @@ export interface Query {
   /** Columns to return, PostgREST syntax. Defaults to "*". */
   select?: string;
   /**
-   * Column filters. A bare value means equality; pass a PostgREST
-   * operator string for anything else, e.g. `{ created_at: "gte.2026-01-01" }`
-   * or `{ status: "in.(new,quoted)" }`.
+   * Column filters. ALWAYS equality, always escaped. A value here can
+   * never be interpreted as a PostgREST operator, however it is spelt.
    */
   where?: Record<string, FilterValue>;
+  /**
+   * Raw PostgREST filter expressions, passed through verbatim —
+   * `{ or: "(a.ilike.*x*,b.ilike.*x*)" }`.
+   *
+   * NEVER BUILD ONE OF THESE FROM USER INPUT without escaping the
+   * values first (see `quoteFilterValue`). This escape hatch exists
+   * only for expressions this codebase constructs itself.
+   */
+  raw?: Record<string, string>;
   order?: { column: string; ascending?: boolean };
   limit?: number;
   offset?: number;
 }
 
 /**
- * A bare value becomes `eq.`; a string that already looks like an
- * operator (`op.rest`) is passed through untouched.
+ * Every `where` value is emitted as an equality match.
+ *
+ * It used to pass a value through untouched when it looked like an
+ * operator (`^(eq|neq|gt|gte|lt|lte|…)\.`). That turned any externally
+ * supplied identifier into a query operator: a request reference of
+ * "gt.A" produced `reference=gt.A`, a range filter that matched the
+ * first row in the table rather than nothing, so an admin detail page
+ * would render an unrelated buyer's record. Route parameters reach this
+ * function directly, so the passthrough was an injection point and is
+ * gone. Internally-built expressions use `raw` instead.
  */
-const OPERATOR = /^(eq|neq|gt|gte|lt|lte|like|ilike|is|in|cs|cd|fts|plfts)\./;
-
 function encodeFilter(value: FilterValue): string {
   if (value === null) return "is.null";
-  const raw = String(value);
-  return OPERATOR.test(raw) ? raw : `eq.${raw}`;
+  // A leading double quote makes PostgREST read the rest as a literal,
+  // so a value containing a comma, a dot or an operator prefix cannot
+  // change the shape of the query.
+  return `eq.${quoteFilterValue(String(value))}`;
+}
+
+/**
+ * Wrap a value as a PostgREST quoted literal. Backslashes and double
+ * quotes are escaped; everything else is safe inside the quotes.
+ */
+export function quoteFilterValue(value: string): string {
+  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
 function buildSearchParams(query: Query = {}): URLSearchParams {
@@ -92,6 +116,9 @@ function buildSearchParams(query: Query = {}): URLSearchParams {
   params.set("select", query.select ?? "*");
   for (const [column, value] of Object.entries(query.where ?? {})) {
     params.append(column, encodeFilter(value));
+  }
+  for (const [column, expression] of Object.entries(query.raw ?? {})) {
+    params.append(column, expression);
   }
   if (query.order) {
     params.set("order", `${query.order.column}.${query.order.ascending ? "asc" : "desc"}`);

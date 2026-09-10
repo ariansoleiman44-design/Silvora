@@ -89,7 +89,23 @@ function guardAdmin(request: NextRequest, pathname: string) {
 export const config = {
   matcher: [
     /*
-     * Everything except:
+     * /admin is matched FIRST and unconditionally.
+     *
+     * The pattern below excludes anything whose last segment contains a
+     * dot, so that static files are not rewritten. That exclusion also
+     * silently removed /admin paths with a dotted parameter — a
+     * reference like "gt.A" or an id like "neq.z" — from the matcher
+     * entirely, which meant proxy() never ran and guardAdmin never
+     * fired. /admin/requests/gt.A returned 200 with a buyer's name,
+     * email, phone and internal notes to anyone, signed in or not.
+     *
+     * An authentication boundary must never be a side effect of a
+     * file-extension heuristic. This entry has no exclusions, so every
+     * /admin path reaches the guard no matter what it contains.
+     */
+    "/admin/:path*",
+    /*
+     * Everything else except:
      *   /api/*        route handlers
      *   /_next/*      framework internals
      *   files with an extension (images, fonts, robots.txt, sitemap.xml…)

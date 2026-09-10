@@ -8,10 +8,12 @@ import {
   setContactNote,
   setContactStatus,
 } from "@/lib/server/admin-data";
+import { requireAdmin } from "@/lib/server/admin-guard";
 
 /** Writes from the enquiry detail screen. Mirrors requests/actions.ts. */
 
 export async function updateContactStatus(formData: FormData): Promise<void> {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const status = formData.get("status");
   if (!id || !isContactStatus(status)) return;
@@ -33,6 +35,7 @@ export async function updateContactStatus(formData: FormData): Promise<void> {
 }
 
 export async function updateContactNote(formData: FormData): Promise<void> {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const note = String(formData.get("note") ?? "");
   if (!id) return;

@@ -8,6 +8,7 @@ import { sanitisePatch, validatePatch, type PatchProblem } from "@/lib/product-s
 import { deleteOverride, getOverride, recordAudit } from "@/lib/server/admin-data";
 import { OVERRIDES_TAG } from "@/lib/server/product-overrides";
 import { upsertRows } from "@/lib/server/supabase";
+import { requireAdmin } from "@/lib/server/admin-guard";
 
 export interface EditorState {
   problems?: PatchProblem[];
@@ -102,6 +103,7 @@ function buildPatch(formData: FormData, base: Record<string, unknown>, isBase: b
 }
 
 export async function saveProduct(_prev: EditorState, formData: FormData): Promise<EditorState> {
+  await requireAdmin();
   const slug = text(formData.get("slug"));
   const locale = text(formData.get("locale")) || defaultLocale;
 
@@ -176,6 +178,7 @@ export async function saveProduct(_prev: EditorState, formData: FormData): Promi
 }
 
 export async function resetProduct(formData: FormData): Promise<void> {
+  await requireAdmin();
   const slug = text(formData.get("slug"));
   const locale = text(formData.get("locale")) || defaultLocale;
   if (!slug || !(activeLocales as string[]).includes(locale)) return;

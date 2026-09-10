@@ -8,16 +8,20 @@ import {
   setQuoteNote,
   setQuoteStatus,
 } from "@/lib/server/admin-data";
+import { requireAdmin } from "@/lib/server/admin-guard";
 
 /**
  * Writes from the request detail screen.
  *
- * Both actions are guarded by proxy.ts like every other /admin path —
- * a server action is reached through a POST to the page it lives on,
- * so the same session check applies.
+ * Each action verifies the session itself via requireAdmin(). proxy.ts
+ * is still the primary gate, but a Server Action is a POST endpoint
+ * reachable without the page it appears on ever being rendered by the
+ * caller — and trusting the proxy alone was already proven wrong once.
+ * See lib/server/admin-guard.ts.
  */
 
 export async function updateStatus(formData: FormData): Promise<void> {
+  await requireAdmin();
   const reference = String(formData.get("reference") ?? "");
   const status = formData.get("status");
 
@@ -40,6 +44,7 @@ export async function updateStatus(formData: FormData): Promise<void> {
 }
 
 export async function updateNote(formData: FormData): Promise<void> {
+  await requireAdmin();
   const reference = String(formData.get("reference") ?? "");
   const note = String(formData.get("note") ?? "");
   if (!reference) return;

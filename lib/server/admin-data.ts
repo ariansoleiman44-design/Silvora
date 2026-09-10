@@ -1,6 +1,7 @@
 import type { QuoteRequest } from "@/types/quote";
 import {
   countRows,
+  quoteFilterValue,
   deleteRows,
   insertRows,
   selectOne,
@@ -109,21 +110,35 @@ export async function listQuotes(filter: InboxFilter = {}): Promise<{
   if (filter.status && filter.status !== "all") where.status = filter.status;
   if (filter.orderType) where.order_type = filter.orderType;
 
-  const search = filter.search?.trim();
+  /*
+   * `or` is a PostgREST expression, not a column filter, so it goes in
+   * `raw`. It used to be passed as a `where` value, which prefixed it
+   * with "eq." and produced `or=eq.(...)` — a parse error. Every search
+   * in the inbox returned a 400 and an empty table.
+   *
+   * The term is quoted rather than stripped: commas, dots, parentheses
+   * and asterisks are all syntax here, and a buyer's company name can
+   * legitimately contain any of them.
+   */
+  const raw: Record<string, string> = {};
+  const search = filter.search?.trim().slice(0, 80);
   if (search) {
-    // PostgREST `or=` with ilike on the columns a person would actually
-    // type. `*` is the wildcard; commas and parens are stripped from the
-    // term because they are the syntax separators of this expression.
-    const term = search.replace(/[(),*]/g, "").slice(0, 80);
-    if (term) {
-      where.or = `(reference.ilike.*${term}*,company.ilike.*${term}*,buyer_name.ilike.*${term}*,buyer_email.ilike.*${term}*,buyer_phone.ilike.*${term}*)`;
-    }
+    const term = quoteFilterValue(`*${search}*`);
+    raw.or = [
+      `reference.ilike.${term}`,
+      `company.ilike.${term}`,
+      `buyer_name.ilike.${term}`,
+      `buyer_email.ilike.${term}`,
+      `buyer_phone.ilike.${term}`,
+    ].join(",");
+    raw.or = `(${raw.or})`;
   }
 
   const { rows, total } = await selectPage<QuoteRow>("quote_requests", {
     select:
       "reference,created_at,received_at,status,order_type,company,buyer_name,buyer_email,buyer_phone,country,line_count,internal_note,updated_at",
     where,
+    raw,
     order: { column: "created_at", ascending: false },
     limit: perPage,
     offset: (page - 1) * perPage,
