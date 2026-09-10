@@ -1,6 +1,6 @@
 import type { ContactRequest, QuoteRequest } from "@/types/quote";
 import { reportError } from "@/lib/observability";
-import { insertRows, isSupabaseConfigured, SupabaseError } from "@/lib/server/supabase";
+import { insertRows, isSupabaseConfigured, selectOne, SupabaseError } from "@/lib/server/supabase";
 import { createServerReference } from "@/lib/server/reference";
 
 /**
@@ -36,8 +36,12 @@ export interface QuoteStore {
    * reference belonging to somebody else's request.
    *
    * Throw to fail — the caller reports failure.
+   *
+   * `idempotencyKey`, when present, must make the write exactly-once:
+   * a repeat with the same key returns the reference already stored
+   * rather than creating a second row.
    */
-  save(request: QuoteRequest): Promise<{ reference: string }>;
+  save(request: QuoteRequest, idempotencyKey?: string): Promise<{ reference: string }>;
 }
 
 export interface QuoteNotifier {
@@ -74,6 +78,8 @@ function webhookStore(url: string): QuoteStore {
   return {
     name: "webhook",
     async save(request) {
+      // A webhook endpoint owns its own deduplication; the key is
+      // forwarded in the body below for it to use.
       const res = await withTimeout(url, {
         method: "POST",
         headers: {
@@ -128,7 +134,24 @@ const logStore: QuoteStore = {
 function supabaseStore(): QuoteStore {
   return {
     name: "supabase",
-    async save(request) {
+    async save(request, idempotencyKey) {
+      /*
+       * Deduplication happens HERE, in the database, not in a Map in
+       * the server process. The in-memory version could not work: it
+       * was per-instance, keyed by client IP so two buyers behind one
+       * office connection collided, and it was written only after every
+       * notifier finished — while the browser gives up at 20s and the
+       * server can still be sending mail at 32s, so the retry arrived
+       * before the key existed.
+       */
+      if (idempotencyKey) {
+        const existing = await selectOne<{ reference: string }>("quote_requests", {
+          select: "reference",
+          where: { idempotency_key: idempotencyKey },
+        });
+        if (existing?.reference) return { reference: existing.reference };
+      }
+
       /*
        * A 409 here is NOT "already saved". The reference is minted
        * server-side per submission with a random suffix, so a collision
@@ -163,11 +186,25 @@ function supabaseStore(): QuoteStore {
               // The payload carries the same reference as the column, so
               // the record is self-consistent after a re-mint.
               payload: record,
+              idempotency_key: idempotencyKey ?? null,
             },
           ]);
           return { reference };
         } catch (error) {
           if (error instanceof SupabaseError && error.status === 409) {
+            /*
+             * Two unique constraints can produce a 409. If the key is
+             * the one that collided, a concurrent retry won the race —
+             * return the reference it stored rather than re-minting,
+             * which would create the duplicate we are preventing.
+             */
+            if (idempotencyKey) {
+              const winner = await selectOne<{ reference: string }>("quote_requests", {
+                select: "reference",
+                where: { idempotency_key: idempotencyKey },
+              });
+              if (winner?.reference) return { reference: winner.reference };
+            }
             reportError(error, {
               scope: "api/quote",
               category: "reference-collision",
@@ -326,7 +363,10 @@ export function isQuoteDeliveryConfigured(): boolean {
  *   3. Neither → not configured. The route returns 503 and the UI tells
  *      the buyer plainly that nothing was sent.
  */
-export async function deliverQuote(request: QuoteRequest): Promise<DeliveryOutcome> {
+export async function deliverQuote(
+  request: QuoteRequest,
+  idempotencyKey?: string,
+): Promise<DeliveryOutcome> {
   const store = resolveStore();
   const notifiers = resolveNotifiers();
 
@@ -338,7 +378,7 @@ export async function deliverQuote(request: QuoteRequest): Promise<DeliveryOutco
 
   if (store) {
     try {
-      const saved = await store.save(request);
+      const saved = await store.save(request, idempotencyKey);
       storedReference = saved.reference;
     } catch (error) {
       reportError(error, {
@@ -400,13 +440,29 @@ export async function deliverQuote(request: QuoteRequest): Promise<DeliveryOutco
  */
 export interface ContactStore {
   readonly name: string;
-  save(request: ContactRequest, reference: string): Promise<void>;
+  /** Returns the reference actually stored — see QuoteStore.save. */
+  save(
+    request: ContactRequest,
+    reference: string,
+    idempotencyKey?: string,
+  ): Promise<{ reference: string }>;
 }
 
 function supabaseContactStore(): ContactStore {
   return {
     name: "supabase",
-    async save(request, reference) {
+    async save(request, reference, idempotencyKey) {
+      // Same reasoning as the quote store: a retry after the client's
+      // 20s timeout must not produce a second enquiry row and a second
+      // email to the sales inbox.
+      if (idempotencyKey) {
+        const existing = await selectOne<{ payload: { reference?: string } }>("contact_requests", {
+          select: "payload",
+          where: { idempotency_key: idempotencyKey },
+        });
+        if (existing?.payload?.reference) return { reference: existing.payload.reference };
+      }
+
       await insertRows("contact_requests", [
         {
           created_at: request.submittedAt,
@@ -419,8 +475,10 @@ function supabaseContactStore(): ContactStore {
           // staff something stable to quote back in a reply.
           subject: `Enquiry ${reference}`,
           payload: { ...request, reference },
+          idempotency_key: idempotencyKey ?? null,
         },
       ]);
+      return { reference };
     },
   };
 }
@@ -440,6 +498,7 @@ function webhookContactStore(url: string): ContactStore {
         body: JSON.stringify({ type: "contact", payload: { ...request, reference } }),
       });
       if (!res.ok) throw new Error(`Contact store webhook returned ${res.status}`);
+      return { reference };
     },
   };
 }
@@ -501,6 +560,7 @@ export function isContactDeliveryConfigured(): boolean {
 export async function deliverContact(
   request: ContactRequest,
   reference: string,
+  idempotencyKey?: string,
 ): Promise<DeliveryOutcome> {
   const store = resolveContactStore();
   const notifier = contactEmailNotifier();
@@ -509,9 +569,17 @@ export async function deliverContact(
     return { delivered: false, reason: "not_configured", notified: [], notifyFailures: [] };
   }
 
+  let storedReference = reference;
+
   if (store) {
     try {
-      await store.save(request, reference);
+      const saved = await store.save(request, reference, idempotencyKey);
+      storedReference = saved.reference;
+      // A repeat of the same key returns the original reference, so the
+      // notifier must not fire again for it.
+      if (storedReference !== reference) {
+        return { delivered: true, reference: storedReference, store: store.name, notified: [], notifyFailures: [] };
+      }
     } catch (error) {
       reportError(error, { scope: "api/contact", category: "storage", reference, store: store.name });
       return {
@@ -540,7 +608,7 @@ export async function deliverContact(
     return { delivered: false, reason: "notify_failed", notified, notifyFailures };
   }
 
-  return { delivered: true, store: store?.name, notified, notifyFailures };
+  return { delivered: true, reference: storedReference, store: store?.name, notified, notifyFailures };
 }
 
 /* ------------------------------------------------------------------ */

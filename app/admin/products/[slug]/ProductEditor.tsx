@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState } from "react";
-import { PRODUCT_SPEC_KEYS } from "@/types/i18n";
 import { AVAILABILITY_VALUES } from "@/lib/product-schema";
 import { resetProduct, saveProduct, type EditorState } from "../actions";
 
@@ -76,7 +75,37 @@ function initialSeo(saved: Record<string, unknown>, baseline: Record<string, unk
 export function ProductEditor({ slug, locale, isBase, baseline, saved }: Props) {
   const [state, action, pending] = useActionState<EditorState, FormData>(saveProduct, {});
 
-  const problemFor = (field: string) => state.problems?.find((p) => p.field === field)?.message;
+  /*
+   * Matched by prefix, not by exact name. A problem on a list item is
+   * reported as "features[2]" and one on a spec label as
+   * "specs.weight.label", so exact matching left them attached to
+   * nothing — the banner said "Fix the fields marked below" with
+   * nothing marked, and no way to discover which value was rejected.
+   */
+  const problemsFor = (field: string) =>
+    (state.problems ?? []).filter(
+      (p) => p.field === field || p.field.startsWith(`${field}[`) || p.field.startsWith(`${field}.`),
+    );
+  const problemFor = (field: string) => problemsFor(field)[0]?.message;
+
+  /*
+   * Anything the form has no input for. Rendered in the banner so a
+   * problem can never be invisible, whatever new field is added later.
+   */
+  const shownFields = new Set<string>([
+    ...(isBase
+      ? ["name", "shortName", "category", "tagline", "shortDescription", "badge", "availabilityNote", "harvestSeason", "availability", "availableFrom", "availableUntil"]
+      : ["name", "shortName", "category", "tagline", "shortDescription", "badge", "availabilityNote"]),
+    ...(isBase
+      ? ["description", "features", "bestFor", "storageGuidance", "handling", "deliveryNotes", "keywords"]
+      : ["description", "features", "bestFor", "storageGuidance", "handling"]),
+    "specs",
+    "seo",
+  ]);
+  const orphanProblems = (state.problems ?? []).filter(
+    (p) => !shownFields.has(p.field.split(/[.[]/)[0] ?? ""),
+  );
+
   const hasOverride = Object.keys(saved).length > 0;
 
   const singles = isBase
@@ -104,6 +133,15 @@ export function ProductEditor({ slug, locale, isBase, baseline, saved }: Props) 
           <p>
             <strong>Nothing was saved.</strong> Fix the fields marked below.
           </p>
+          {orphanProblems.length > 0 && (
+            <ul style={{ margin: "6px 0 0", paddingInlineStart: 18 }}>
+              {orphanProblems.map((p) => (
+                <li key={`${p.field}-${p.message}`} className="admin-mono" style={{ fontSize: 12 }}>
+                  {p.field} {p.message}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
@@ -188,7 +226,11 @@ export function ProductEditor({ slug, locale, isBase, baseline, saved }: Props) 
               ? "Changing a value here clears its unverified marker. Only enter figures that were actually measured."
               : "Translate the label and, where it is prose rather than a number, the value."}
           </p>
-          {PRODUCT_SPEC_KEYS.map((key) => (
+          {/*
+            Driven by the baseline, not by every possible key: a row the
+            product does not define cannot be saved, so it is not shown.
+          */}
+          {Object.keys((baseline.specs ?? {}) as Record<string, unknown>).map((key) => (
             <fieldset
               key={key}
               style={{ border: "1px solid var(--line-soft)", borderRadius: 6, padding: 12, marginBottom: 12 }}
@@ -199,6 +241,9 @@ export function ProductEditor({ slug, locale, isBase, baseline, saved }: Props) 
               <label className="admin-field">
                 <span>Label</span>
                 <input type="text" name={`spec.${key}.label`} defaultValue={initialSpec(saved, baseline, key, "label")} />
+                {problemFor(`specs.${key}.label`) && (
+                  <span className="field-error">{problemFor(`specs.${key}.label`)}</span>
+                )}
               </label>
               <label className="admin-field">
                 <span>Value</span>
@@ -210,6 +255,9 @@ export function ProductEditor({ slug, locale, isBase, baseline, saved }: Props) 
               <label className="admin-field" style={{ marginBottom: 0 }}>
                 <span>Note</span>
                 <input type="text" name={`spec.${key}.note`} defaultValue={initialSpec(saved, baseline, key, "note")} />
+                {problemFor(`specs.${key}.note`) && (
+                  <span className="field-error">{problemFor(`specs.${key}.note`)}</span>
+                )}
               </label>
             </fieldset>
           ))}

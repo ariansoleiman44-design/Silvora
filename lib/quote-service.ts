@@ -234,7 +234,7 @@ function createApiProvider(endpoint: string): FormsProvider {
   return {
     mode: "api",
     submitQuote: (p, options) => post("quote", p, options),
-    submitContact: (p) => post("contact", p),
+    submitContact: (p, options) => post("contact", p, options),
   };
 }
 

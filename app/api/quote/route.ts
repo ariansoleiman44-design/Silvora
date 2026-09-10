@@ -115,22 +115,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ reference: createServerReference("CF") }, { status: 200 });
   }
 
-  /* 4 — contact enquiries take their own path ------------------------ */
-  if (kind === "contact") {
-    return handleContact(payload, key, started);
-  }
-
-  /* 4b — validate ---------------------------------------------------- */
-  const result = validateQuoteRequest(payload);
-  if (!result.ok) {
-    return fail(422, {
-      error: "Some details need checking before we can send this.",
-      code: "validation_failed",
-      fields: result.errors,
-    });
-  }
-
-  /* 5 — idempotency -------------------------------------------------- */
+  /*
+   * 4 — idempotency key, read before the branch so BOTH forms get it.
+   *
+   * The in-process cache below is a fast path only. It is per-instance
+   * and keyed by client IP, so it cannot be relied on: two buyers behind
+   * one office connection share a key space, and the browser aborts at
+   * 20s while this handler can still be notifying at 32s — the retry
+   * routinely arrives before the key is recorded. The real guarantee is
+   * a unique column in the database (docs/sql/002-idempotency.sql),
+   * enforced inside the store.
+   */
   const idempotencyKey =
     request.headers.get("idempotency-key")?.trim() ||
     (typeof payload.idempotencyKey === "string" ? payload.idempotencyKey.trim() : "");
@@ -141,6 +136,21 @@ export async function POST(request: Request) {
       console.info(`[api/quote] duplicate submission ignored, reference ${previous}`);
       return NextResponse.json({ reference: previous, duplicate: true }, { status: 200 });
     }
+  }
+
+  /* 4b — contact enquiries take their own path ----------------------- */
+  if (kind === "contact") {
+    return handleContact(payload, key, started, idempotencyKey);
+  }
+
+  /* 5 — validate ----------------------------------------------------- */
+  const result = validateQuoteRequest(payload);
+  if (!result.ok) {
+    return fail(422, {
+      error: "Some details need checking before we can send this.",
+      code: "validation_failed",
+      fields: result.errors,
+    });
   }
 
   /* 6 — deliver ------------------------------------------------------ */
@@ -159,7 +169,7 @@ export async function POST(request: Request) {
   const record = { ...result.value, reference };
 
   try {
-    const outcome = await deliverQuote(record);
+    const outcome = await deliverQuote(record, idempotencyKey || undefined);
 
     if (!outcome.delivered) {
       console.error(`[api/quote] ${reference} not delivered: ${outcome.reason}`);
@@ -231,6 +241,7 @@ async function handleContact(
   payload: Record<string, unknown>,
   key: string,
   started: number,
+  idempotencyKey: string,
 ): Promise<NextResponse> {
   const result = validateContactRequest(payload);
   if (!result.ok) {
@@ -256,7 +267,7 @@ async function handleContact(
   const reference = createServerReference("CFC");
 
   try {
-    const outcome = await deliverContact(result.value, reference);
+    const outcome = await deliverContact(result.value, reference, idempotencyKey || undefined);
 
     if (!outcome.delivered) {
       console.error(`[api/contact] ${reference} not delivered: ${outcome.reason}`);
@@ -275,12 +286,14 @@ async function handleContact(
       );
     }
 
+    const storedReference = outcome.reference ?? reference;
+    if (idempotencyKey) rememberIdempotent(`${key}:${idempotencyKey}`, storedReference);
     console.info(
-      `[api/contact] ${reference} delivered via ${outcome.store ?? "notifier"}` +
+      `[api/contact] ${storedReference} delivered via ${outcome.store ?? "notifier"}` +
         `${outcome.notified.length ? `, notified: ${outcome.notified.join(",")}` : ""}` +
         ` (${Date.now() - started}ms)`,
     );
-    return NextResponse.json({ reference }, { status: 200 });
+    return NextResponse.json({ reference: storedReference }, { status: 200 });
   } catch (error) {
     reportError(error, { scope: "api/contact", category: "unhandled", reference });
     return fail(500, {

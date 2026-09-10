@@ -5,7 +5,7 @@ import { AlertCircle, Check } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { TextArea, TextField } from "@/components/ui/Field";
-import { quoteService } from "@/lib/quote-service";
+import { createIdempotencyKey, quoteService } from "@/lib/quote-service";
 import { useCopy } from "@/lib/locale-client";
 import type { ContactRequest, SubmissionResult } from "@/types/quote";
 
@@ -30,6 +30,13 @@ export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [result, setResult] = useState<SubmissionResult | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof ContactRequest, string>>>({});
+  /*
+   * One key for the life of this form. A retry after the 20s timeout
+   * then reuses it, and the store returns the reference it already
+   * saved instead of writing a second enquiry and sending a second
+   * email to the sales inbox.
+   */
+  const [idempotencyKey] = useState(createIdempotencyKey);
 
   const set = (key: keyof typeof values) => (e: { target: { value: string } }) =>
     setValues((v) => ({ ...v, [key]: e.target.value }));
@@ -48,7 +55,10 @@ export function ContactForm() {
     e.preventDefault();
     if (!validate()) return;
     setStatus("sending");
-    const res = await quoteService.submitContact({ ...values, submittedAt: new Date().toISOString() });
+    const res = await quoteService.submitContact(
+      { ...values, submittedAt: new Date().toISOString() },
+      { idempotencyKey },
+    );
     setResult(res);
 
     /*

@@ -92,13 +92,21 @@ export default async function ProductEditorPage({
     deliveryNotes: fromCode.deliveryNotes ?? [],
     keywords: fromCode.keywords ?? [],
     seo: fromCode.seo ?? {},
+    /*
+     * ONLY the rows this product actually defines.
+     *
+     * The editor used to render a fieldset for every possible spec key.
+     * A row the committed product does not have could be filled in and
+     * "saved", but applySpec returns early when there is no base row, so
+     * it was silently dropped on render — bulk-custom-order's weight,
+     * dimensions and moisture could be typed in forever and never
+     * appear. Offering a field that cannot be saved is worse than not
+     * offering it.
+     */
     specs: Object.fromEntries(
-      PRODUCT_SPEC_KEYS.map((key) => {
-        const spec = fromCode[key];
-        return [
-          key,
-          spec ? { label: spec.label, value: spec.value, note: spec.note ?? "" } : { label: "", value: "", note: "" },
-        ];
+      PRODUCT_SPEC_KEYS.filter((key) => fromCode[key]).map((key) => {
+        const spec = fromCode[key]!;
+        return [key, { label: spec.label, value: spec.value, note: spec.note ?? "" }];
       }),
     ),
   };

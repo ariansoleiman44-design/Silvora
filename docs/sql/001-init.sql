@@ -37,8 +37,16 @@ create table if not exists public.quote_requests (
   payload       jsonb not null,
   -- Staff-only. Never shown to the buyer, never leaves the panel.
   internal_note text not null default '',
+  -- Deduplicates a retried submission. Unique where present, so the
+  -- same key can never produce two rows; see 002-idempotency.sql for
+  -- why this cannot live in server memory.
+  idempotency_key text,
   updated_at    timestamptz not null default now()
 );
+
+create unique index if not exists quote_requests_idempotency_idx
+  on public.quote_requests (idempotency_key)
+  where idempotency_key is not null;
 
 create index if not exists quote_requests_created_idx on public.quote_requests (created_at desc);
 create index if not exists quote_requests_status_idx  on public.quote_requests (status, created_at desc);
@@ -62,8 +70,13 @@ create table if not exists public.contact_requests (
   subject       text,
   payload       jsonb not null,
   internal_note text not null default '',
+  idempotency_key text,
   updated_at    timestamptz not null default now()
 );
+
+create unique index if not exists contact_requests_idempotency_idx
+  on public.contact_requests (idempotency_key)
+  where idempotency_key is not null;
 
 create index if not exists contact_requests_created_idx on public.contact_requests (created_at desc);
 
