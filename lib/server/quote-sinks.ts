@@ -1,4 +1,4 @@
-import type { QuoteRequest } from "@/types/quote";
+import type { ContactRequest, QuoteRequest } from "@/types/quote";
 import { reportError } from "@/lib/observability";
 import { insertRows, isSupabaseConfigured, SupabaseError } from "@/lib/server/supabase";
 
@@ -321,6 +321,167 @@ export async function deliverQuote(request: QuoteRequest): Promise<DeliveryOutco
   }
 
   // Notifier-only deployment: nothing else is holding this request.
+  if (!store && notified.length === 0) {
+    return { delivered: false, reason: "notify_failed", notified, notifyFailures };
+  }
+
+  return { delivered: true, store: store?.name, notified, notifyFailures };
+}
+
+/* ------------------------------------------------------------------ */
+/* Contact enquiries                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The general enquiry form goes to its own table, not to quote_requests.
+ *
+ * They are different objects: an enquiry has no products, no delivery
+ * and no order type, and it moves through a different set of states
+ * (replied / closed rather than quoted / won / lost). Forcing one into
+ * the other's shape is what produced the bug where every contact
+ * submission was validated as a quote and rejected.
+ *
+ * The same rule as everywhere else applies: if nothing durable accepts
+ * it, the caller must not tell the sender it was received.
+ */
+export interface ContactStore {
+  readonly name: string;
+  save(request: ContactRequest, reference: string): Promise<void>;
+}
+
+function supabaseContactStore(): ContactStore {
+  return {
+    name: "supabase",
+    async save(request, reference) {
+      await insertRows("contact_requests", [
+        {
+          created_at: request.submittedAt,
+          status: "new",
+          name: request.name,
+          company: request.company,
+          email: request.email,
+          phone: request.phone,
+          // There is no subject field on the form; the reference gives
+          // staff something stable to quote back in a reply.
+          subject: `Enquiry ${reference}`,
+          payload: { ...request, reference },
+        },
+      ]);
+    },
+  };
+}
+
+function webhookContactStore(url: string): ContactStore {
+  return {
+    name: "webhook",
+    async save(request, reference) {
+      const res = await withTimeout(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(env("QUOTE_WEBHOOK_SECRET")
+            ? { Authorization: `Bearer ${env("QUOTE_WEBHOOK_SECRET")}` }
+            : {}),
+        },
+        body: JSON.stringify({ type: "contact", payload: { ...request, reference } }),
+      });
+      if (!res.ok) throw new Error(`Contact store webhook returned ${res.status}`);
+    },
+  };
+}
+
+export function resolveContactStore(): ContactStore | null {
+  if (isSupabaseConfigured()) return supabaseContactStore();
+  const webhook = env("QUOTE_WEBHOOK_URL");
+  if (webhook) return webhookContactStore(webhook);
+  return null;
+}
+
+/** Email the enquiry to the sales inbox, reusing the quote mail transport. */
+function contactEmailNotifier(): QuoteNotifier | null {
+  const apiKey = env("QUOTE_EMAIL_API_KEY");
+  const to = env("QUOTE_EMAIL_TO");
+  const from = env("QUOTE_EMAIL_FROM");
+  if (!apiKey || !to || !from) return null;
+  const endpoint = env("QUOTE_EMAIL_ENDPOINT") || "https://api.resend.com/emails";
+
+  return {
+    name: "contact-email",
+    async notify(request) {
+      const c = request as unknown as ContactRequest & { reference?: string };
+      const lines = [
+        `Name:     ${c.name}`,
+        c.company ? `Company:  ${c.company}` : "",
+        c.email ? `Email:    ${c.email}` : "",
+        c.phone ? `Phone:    ${c.phone}` : "",
+        c.country || c.city ? `Location: ${[c.city, c.country].filter(Boolean).join(", ")}` : "",
+        "",
+        c.message,
+      ].filter(Boolean);
+
+      const res = await withTimeout(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          from,
+          to: to.split(",").map((a) => a.trim()).filter(Boolean),
+          subject: `Enquiry ${c.reference ?? ""} — ${c.name}`.trim(),
+          text: lines.join("\n"),
+          ...(c.email ? { reply_to: c.email } : {}),
+        }),
+      });
+      if (!res.ok) throw new Error(`Contact email API returned ${res.status}`);
+    },
+  };
+}
+
+export function isContactDeliveryConfigured(): boolean {
+  return resolveContactStore() !== null || contactEmailNotifier() !== null;
+}
+
+/**
+ * Same contract as deliverQuote: the STORE decides success. A notifier
+ * only becomes the delivery mechanism when there is no store, because
+ * then it is the only thing holding the message.
+ */
+export async function deliverContact(
+  request: ContactRequest,
+  reference: string,
+): Promise<DeliveryOutcome> {
+  const store = resolveContactStore();
+  const notifier = contactEmailNotifier();
+
+  if (!store && !notifier) {
+    return { delivered: false, reason: "not_configured", notified: [], notifyFailures: [] };
+  }
+
+  if (store) {
+    try {
+      await store.save(request, reference);
+    } catch (error) {
+      reportError(error, { scope: "api/contact", category: "storage", reference, store: store.name });
+      return {
+        delivered: false,
+        reason: "store_failed",
+        store: store.name,
+        notified: [],
+        notifyFailures: [],
+      };
+    }
+  }
+
+  const notified: string[] = [];
+  const notifyFailures: string[] = [];
+  if (notifier) {
+    try {
+      await notifier.notify({ ...request, reference } as never);
+      notified.push(notifier.name);
+    } catch (error) {
+      notifyFailures.push(notifier.name);
+      reportError(error, { scope: "api/contact", category: "notify", reference, notifier: notifier.name });
+    }
+  }
+
   if (!store && notified.length === 0) {
     return { delivered: false, reason: "notify_failed", notified, notifyFailures };
   }

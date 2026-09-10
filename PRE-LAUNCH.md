@@ -47,7 +47,24 @@ request it answers **503 `not_configured`**, and the site tells the
 visitor plainly that nothing was sent, handing them the summary to send
 themselves.
 
-**To connect it — no code change required:**
+This covers BOTH forms. The quote wizard and the general contact form
+post to the same route, which branches on the envelope's `type`: a quote
+is validated as a quote and stored in `quote_requests`, an enquiry is
+validated as an enquiry and stored in `contact_requests`. Connecting a
+destination turns on both.
+
+**Easiest option — Supabase, which also gives you the admin panel:**
+
+```bash
+SUPABASE_URL=https://<project>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=…        # server only, NEVER NEXT_PUBLIC_
+```
+
+Run `docs/sql/001-init.sql` first. See [docs/ADMIN.md](docs/ADMIN.md).
+With this set, requests and enquiries persist and are readable at
+`/admin` — which is the only option that lets you read them back.
+
+**Or, without a database — no code change required:**
 
 ```bash
 # Durable storage. This decides whether a submission counts as delivered.

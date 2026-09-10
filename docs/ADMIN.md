@@ -96,6 +96,26 @@ buyer-supplied string as a formula.
 
 ---
 
+## Enquiries
+
+`/admin/contacts`. Messages from the general contact form, kept apart
+from quote requests on purpose: an enquiry has no products, no delivery
+and no order type, and it moves through `new → replied → closed` rather
+than the quote states.
+
+They land in `contact_requests`, get a `CFC-` reference, and are subject
+to the same rule as everything else — nothing is reported as sent unless
+something durable accepted it. If no store is configured but a sales
+mailbox is, the email becomes the delivery mechanism and must succeed.
+
+> **This form was broken before.** `/api/quote` ignored the envelope's
+> `type` and validated every submission with `validateQuoteRequest`, so
+> a contact message failed on the missing `orderType`, `products` and
+> `delivery` and came back 422 every time. The route now branches on
+> `type` and enquiries have their own validator, store and screen.
+
+---
+
 ## The product editor
 
 **The database does not hold products. It holds patches.**

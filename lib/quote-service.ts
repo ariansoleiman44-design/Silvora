@@ -126,7 +126,7 @@ const mockProvider: FormsProvider = {
   },
   async submitContact(payload) {
     await wait(600);
-    const reference = createReference("CF-C");
+    const reference = createReference("CFC");
     persistMock({ type: "contact", reference, payload });
     return { ok: true, reference, mode: "mock" };
   },
@@ -270,7 +270,7 @@ const supabaseProvider: FormsProvider = {
       : { ok: true, reference: payload.reference, mode: "api" };
   },
   async submitContact(payload) {
-    const reference = createReference("CF-C");
+    const reference = createReference("CFC");
     const { error } = await supabase.from("contact_messages").insert({ reference, ...payload });
     return error ? { ok: false, error: error.message, mode: "api" } : { ok: true, reference, mode: "api" };
   },

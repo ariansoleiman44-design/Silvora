@@ -1,5 +1,6 @@
 import type {
   CalculatorEstimate,
+  ContactRequest,
   OrderKind,
   QuoteItem,
   QuoteRequest,
@@ -30,6 +31,10 @@ export interface FieldError {
 
 export type ValidationResult =
   | { ok: true; value: QuoteRequest }
+  | { ok: false; errors: FieldError[] };
+
+export type ContactValidationResult =
+  | { ok: true; value: ContactRequest }
   | { ok: false; errors: FieldError[] };
 
 /* ------------------------------------------------------------------ */
@@ -280,4 +285,53 @@ export function validateQuoteRequest(input: unknown): ValidationResult {
       source: str(input.source, 60) || "unknown",
     },
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* Contact form                                                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The general enquiry form is NOT a quote. It has no products, no
+ * delivery block and no order type, so running it through
+ * validateQuoteRequest rejects every submission — which is exactly what
+ * used to happen, because /api/quote ignored the envelope's `type`.
+ *
+ * Same philosophy as above: reject malformed or abusive, tolerate
+ * untidy. A message is required here where it is optional on a quote,
+ * because on this form the message IS the request.
+ */
+export function validateContactRequest(input: unknown): ContactValidationResult {
+  const errors: FieldError[] = [];
+  const fail = (field: string, message: string) => errors.push({ field, message });
+
+  if (!isObject(input)) {
+    return { ok: false, errors: [{ field: "payload", message: "Expected an object" }] };
+  }
+
+  const value: ContactRequest = {
+    name: str(input.name),
+    company: str(input.company),
+    phone: str(input.phone, 40),
+    email: str(input.email, LIMITS.maxEmail).toLowerCase(),
+    country: str(input.country),
+    city: str(input.city),
+    message: text(input.message),
+    // Client-supplied timestamps are advisory; the server stamps its own.
+    submittedAt: new Date().toISOString(),
+  };
+
+  if (!value.name) fail("name", "A name is required");
+  if (!value.message) fail("message", "A message is required");
+  if (value.email && !EMAIL_RE.test(value.email)) {
+    fail("email", "That email address does not look valid");
+  }
+  if (value.phone && !looksLikePhone(value.phone)) {
+    fail("phone", "That phone number does not look valid");
+  }
+  if (!value.email && !value.phone) {
+    fail("contact", "An email address or a phone number is required");
+  }
+
+  return errors.length ? { ok: false, errors } : { ok: true, value };
 }

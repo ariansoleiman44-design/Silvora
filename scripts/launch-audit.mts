@@ -256,6 +256,33 @@ warning(
 );
 
 /* ------------------------------------------------------------------ */
+/* Contact form                                                        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The enquiry form has its own destination (contact_requests, or the
+ * webhook, or the sales mailbox). It used to be validated as a quote
+ * and rejected outright, so it is worth checking separately rather than
+ * assuming the quote path covers it.
+ */
+const contactStore = supabase || env("QUOTE_WEBHOOK_URL");
+const contactEmail = env("QUOTE_EMAIL_API_KEY") && env("QUOTE_EMAIL_TO") && env("QUOTE_EMAIL_FROM");
+
+if (contactStore) {
+  ready("Contact form", `enquiries stored via ${supabase ? "Supabase" : "QUOTE_WEBHOOK_URL"}`);
+} else if (contactEmail) {
+  warning(
+    "Contact form",
+    "enquiries are emailed but not stored — a failed send loses the message with nothing to recover from",
+  );
+} else {
+  warning(
+    "Contact form",
+    "no destination configured — the form refuses to submit and tells the sender to use the contact details instead",
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Admin panel                                                         */
 /* ------------------------------------------------------------------ */
 

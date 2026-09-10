@@ -144,6 +144,9 @@ a { color: inherit; }
 .pill-won       { background: #e2f4e8; color: #1d6b3c; border-color: #bde0c9; }
 .pill-lost      { background: #f2f2f2; color: #5a615c; border-color: #dcdcdc; }
 .pill-spam      { background: #fbe6e3; color: #8c2c20; border-color: #f0c6c0; }
+/* Contact enquiry states. `new` and `spam` are shared with quotes. */
+.pill-replied   { background: #e2f4e8; color: #1d6b3c; border-color: #bde0c9; }
+.pill-closed    { background: #f2f2f2; color: #5a615c; border-color: #dcdcdc; }
 
 /* ------------------------------------------------------------------ */
 /* Forms and buttons                                                   */

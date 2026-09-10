@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
-import { validateQuoteRequest, LIMITS } from "@/lib/server/validate-quote";
+import { validateContactRequest, validateQuoteRequest, LIMITS } from "@/lib/server/validate-quote";
 import { createServerReference } from "@/lib/server/reference";
-import { deliverQuote, isQuoteDeliveryConfigured } from "@/lib/server/quote-sinks";
+import {
+  deliverContact,
+  deliverQuote,
+  isContactDeliveryConfigured,
+  isQuoteDeliveryConfigured,
+} from "@/lib/server/quote-sinks";
 import {
   checkBotSignals,
   checkRateLimit,
@@ -91,6 +96,13 @@ export async function POST(request: Request) {
   const envelope = (body ?? {}) as Record<string, unknown>;
   // Accept both { type, payload } and a bare payload.
   const payload = (envelope.payload ?? envelope) as Record<string, unknown>;
+  /*
+   * The envelope's `type` decides which validator runs. Ignoring it —
+   * as this route used to — meant every contact enquiry was validated
+   * as a quote, failed on the missing orderType/products/delivery, and
+   * came back 422. The contact form could not submit at all.
+   */
+  const kind = envelope.type === "contact" ? "contact" : "quote";
 
   const bot = checkBotSignals({
     honeypot: payload.website,
@@ -103,7 +115,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ reference: createServerReference("CF") }, { status: 200 });
   }
 
-  /* 4 — validate ----------------------------------------------------- */
+  /* 4 — contact enquiries take their own path ------------------------ */
+  if (kind === "contact") {
+    return handleContact(payload, key, started);
+  }
+
+  /* 4b — validate ---------------------------------------------------- */
   const result = validateQuoteRequest(payload);
   if (!result.ok) {
     return fail(422, {
@@ -187,4 +204,80 @@ export async function GET() {
     ok: true,
     configured: isQuoteDeliveryConfigured(),
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* Contact enquiries                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The same contract as a quote submission, with a different validator
+ * and a different destination: nothing is reported as received unless
+ * something durable accepted it.
+ *
+ * `key` is the caller identity already computed for rate limiting, so
+ * an enquiry counts against the same budget as a quote — one form
+ * cannot be used to get around the limit on the other.
+ */
+async function handleContact(
+  payload: Record<string, unknown>,
+  key: string,
+  started: number,
+): Promise<NextResponse> {
+  const result = validateContactRequest(payload);
+  if (!result.ok) {
+    return fail(422, {
+      error: "Some details need checking before we can send this.",
+      code: "validation_failed",
+      fields: result.errors,
+    });
+  }
+
+  if (!isContactDeliveryConfigured()) {
+    console.error("[api/contact] not configured — nothing was sent.");
+    return fail(503, {
+      error:
+        "Online submission is not connected yet. Your message has not been sent — please use the contact details on the site.",
+      code: "not_configured",
+    });
+  }
+
+  // "CFC" marks an enquiry apart from a quote at a glance. Three
+  // letters, not "CF-C": REFERENCE_PATTERN is ^[A-Z]{2,4}-\d{6}-[A-Z2-9]{4}$
+  // and a second hyphen would not match it.
+  const reference = createServerReference("CFC");
+
+  try {
+    const outcome = await deliverContact(result.value, reference);
+
+    if (!outcome.delivered) {
+      console.error(`[api/contact] ${reference} not delivered: ${outcome.reason}`);
+      return fail(
+        outcome.reason === "not_configured" ? 503 : 502,
+        outcome.reason === "not_configured"
+          ? {
+              error:
+                "Online submission is not connected yet. Your message has not been sent — please use the contact details on the site.",
+              code: "not_configured",
+            }
+          : {
+              error: "We could not send your message. Please try again in a moment.",
+              code: "delivery_failed",
+            },
+      );
+    }
+
+    console.info(
+      `[api/contact] ${reference} delivered via ${outcome.store ?? "notifier"}` +
+        `${outcome.notified.length ? `, notified: ${outcome.notified.join(",")}` : ""}` +
+        ` (${Date.now() - started}ms)`,
+    );
+    return NextResponse.json({ reference }, { status: 200 });
+  } catch (error) {
+    reportError(error, { scope: "api/contact", category: "unhandled", reference });
+    return fail(500, {
+      error: "Something went wrong at our end. Please try again.",
+      code: "server_error",
+    });
+  }
 }

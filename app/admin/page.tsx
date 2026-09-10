@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { listQuotes, quoteCounts } from "@/lib/server/admin-data";
+import { contactCounts, listQuotes, quoteCounts } from "@/lib/server/admin-data";
 import { isSupabaseConfigured, SupabaseError } from "@/lib/server/supabase";
 import { isQuoteDeliveryConfigured } from "@/lib/server/quote-sinks";
 import { Empty, NoDatabase, ReadFailed, StatusPill, Stat, When } from "./ui";
@@ -19,10 +19,15 @@ export default async function AdminHome() {
 
   let counts: Awaited<ReturnType<typeof quoteCounts>> | null = null;
   let recent: Awaited<ReturnType<typeof listQuotes>> | null = null;
+  let contacts: Awaited<ReturnType<typeof contactCounts>> | null = null;
   let failure: string | null = null;
 
   try {
-    [counts, recent] = await Promise.all([quoteCounts(), listQuotes({ perPage: 8 })]);
+    [counts, recent, contacts] = await Promise.all([
+      quoteCounts(),
+      listQuotes({ perPage: 8 }),
+      contactCounts(),
+    ]);
   } catch (error) {
     failure = error instanceof SupabaseError ? `${error.message} (${error.status})` : String(error);
   }
@@ -60,6 +65,13 @@ export default async function AdminHome() {
         <Stat label="Reviewing" value={counts.reviewing} href="/admin/requests?status=reviewing" />
         <Stat label="Quoted" value={counts.quoted} href="/admin/requests?status=quoted" />
         <Stat label="Won" value={counts.won} href="/admin/requests?status=won" />
+      </div>
+
+      {/* Enquiries are a separate stream from quotes — different form,
+          different table, different states. */}
+      <div className="admin-grid admin-grid-4" style={{ marginTop: 12 }}>
+        <Stat label="New enquiries" value={contacts?.new ?? 0} href="/admin/contacts?status=new" />
+        <Stat label="All enquiries" value={contacts?.total ?? 0} href="/admin/contacts" />
       </div>
 
       <h2 className="admin-h2">Latest requests</h2>

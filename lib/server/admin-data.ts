@@ -178,11 +178,57 @@ export async function quotesForExport(filter: InboxFilter = {}): Promise<QuoteRo
 /* Contact requests                                                    */
 /* ------------------------------------------------------------------ */
 
-export async function listContacts(limit = 50): Promise<ContactRow[]> {
-  return selectRows<ContactRow>("contact_requests", {
+export const CONTACT_PAGE_SIZE = 25;
+
+export function isContactStatus(value: unknown): value is ContactStatus {
+  return typeof value === "string" && (CONTACT_STATUSES as readonly string[]).includes(value);
+}
+
+/**
+ * One page of enquiries plus the unpaged total. Like the quote inbox,
+ * `payload` is left out of the list query — the detail view reads it.
+ */
+export async function listContacts(filter: {
+  status?: ContactStatus | "all";
+  page?: number;
+  perPage?: number;
+} = {}): Promise<{ rows: ContactRow[]; total: number; page: number; pageCount: number }> {
+  const perPage = filter.perPage ?? CONTACT_PAGE_SIZE;
+  const page = Math.max(1, filter.page ?? 1);
+
+  const where: Record<string, string> = {};
+  if (filter.status && filter.status !== "all") where.status = filter.status;
+
+  const { rows, total } = await selectPage<ContactRow>("contact_requests", {
+    select: "id,created_at,status,name,company,email,phone,subject,internal_note",
+    where,
     order: { column: "created_at", ascending: false },
-    limit,
+    limit: perPage,
+    offset: (page - 1) * perPage,
   });
+
+  return { rows, total, page, pageCount: Math.max(1, Math.ceil(total / perPage)) };
+}
+
+export async function getContact(id: string): Promise<ContactRow | null> {
+  return selectOne<ContactRow>("contact_requests", { where: { id } });
+}
+
+export async function setContactStatus(id: string, status: ContactStatus): Promise<void> {
+  await updateRows("contact_requests", { status }, { id });
+}
+
+export async function setContactNote(id: string, note: string): Promise<void> {
+  await updateRows("contact_requests", { internal_note: note.slice(0, 4_000) }, { id });
+}
+
+/** New-enquiry count for the dashboard. */
+export async function contactCounts(): Promise<Record<ContactStatus | "total", number>> {
+  const entries = await Promise.all(
+    CONTACT_STATUSES.map(async (status) => [status, await countRows("contact_requests", { status })] as const),
+  );
+  const counts = Object.fromEntries(entries) as Record<ContactStatus, number>;
+  return { ...counts, total: Object.values(counts).reduce((a, b) => a + b, 0) };
 }
 
 /* ------------------------------------------------------------------ */
