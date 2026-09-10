@@ -182,6 +182,17 @@ and why you must only do it for figures that were actually measured. A
 translation never clears it: rewording a number in Kurdish does not make
 it measured.
 
+### Editing the database directly
+
+Product pages are prerendered and cached under a tag. Saving through the
+panel calls `updateTag`, so an edit is live at once.
+
+A row written STRAIGHT into `product_overrides` — by hand, or by a
+script — invalidates nothing, so the pages keep serving the previously
+built HTML. `.next/cache` also survives a rebuild, so even `npm run
+build` will not pick it up. Use the panel; if you must edit by hand,
+clear `.next/cache` and rebuild.
+
 ### What a publish does and does not reach
 
 An edit is live on the product page and in its `<title>`, description,

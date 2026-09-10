@@ -97,15 +97,28 @@ export interface Query {
  */
 function encodeFilter(value: FilterValue): string {
   if (value === null) return "is.null";
-  // A leading double quote makes PostgREST read the rest as a literal,
-  // so a value containing a comma, a dot or an operator prefix cannot
-  // change the shape of the query.
-  return `eq.${quoteFilterValue(String(value))}`;
+  /*
+   * The `eq.` prefix is the whole defence, and it is sufficient.
+   * PostgREST splits `column=operator.value` on the FIRST dot, so
+   * everything after `eq.` is read as a literal: `reference=eq.gt.A`
+   * matches the string "gt.A" and nothing else. Verified against the
+   * live database, along with the old behaviour it replaces —
+   * `reference=gt.A` really did return an unrelated row.
+   *
+   * Do NOT wrap this in double quotes. PostgREST does not strip them
+   * for `eq.`; it searches for a value that literally contains them, so
+   * quoting here silently breaks every exact-match lookup. (It IS
+   * required inside `or=` — see quoteFilterValue.)
+   */
+  return `eq.${String(value)}`;
 }
 
 /**
- * Wrap a value as a PostgREST quoted literal. Backslashes and double
- * quotes are escaped; everything else is safe inside the quotes.
+ * Wrap a value as a PostgREST quoted literal, for use INSIDE a logical
+ * expression such as `or=(a.ilike."…",b.ilike."…")`, where commas,
+ * dots and parentheses are syntax rather than content.
+ *
+ * Not for `where` values — see encodeFilter above.
  */
 export function quoteFilterValue(value: string): string {
   return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
