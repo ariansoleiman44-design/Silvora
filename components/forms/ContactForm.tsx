@@ -50,6 +50,31 @@ export function ContactForm() {
     setStatus("sending");
     const res = await quoteService.submitContact({ ...values, submittedAt: new Date().toISOString() });
     setResult(res);
+
+    /*
+     * The server validates independently and its rules are the real
+     * gate. When it rejects a field the browser was happy with, mark
+     * that field instead of showing only a banner — otherwise the
+     * sender is told something is wrong with a form where every visible
+     * input looks correct, and has no way to find it.
+     *
+     * `contact` is the server's name for "email or phone is required";
+     * it has no input of its own, so it is shown against the email
+     * field, which is where the same client-side rule reports.
+     */
+    if (!res.ok && res.fields?.length) {
+      const mapped: typeof errors = {};
+      for (const problem of res.fields) {
+        const key = (problem.field === "contact" ? "email" : problem.field) as keyof ContactRequest;
+        if (key in values) mapped[key] = problem.message;
+      }
+      if (Object.keys(mapped).length) {
+        setErrors(mapped);
+        setStatus("idle");
+        return;
+      }
+    }
+
     setStatus(res.ok ? "success" : "error");
   };
 

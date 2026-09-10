@@ -167,6 +167,16 @@ and why you must only do it for figures that were actually measured. A
 translation never clears it: rewording a number in Kurdish does not make
 it measured.
 
+### What a publish does and does not reach
+
+An edit is live on the product page and in its `<title>`, description,
+canonical and Open Graph tags as soon as you publish.
+
+**The share-card image is not regenerated.** `opengraph-image.tsx`
+renders from the committed catalogue, so a name changed in the panel
+still shows the old name in the picture a link preview draws. Change it
+in `data/products.ts` and commit if that matters for a campaign.
+
 ### Validation
 
 [`lib/product-schema.ts`](../lib/product-schema.ts) defines what a patch

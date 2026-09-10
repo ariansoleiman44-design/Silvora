@@ -60,9 +60,40 @@ export function checkRateLimit(key: string, now = Date.now()): RateResult {
 
 /** Best-effort client identity from proxy headers. */
 export function clientKey(headers: Headers): string {
+  /*
+   * TRUST ORDER MATTERS, AND THE LEFTMOST X-Forwarded-For ENTRY IS NOT
+   * TRUSTWORTHY.
+   *
+   * A client can send its own X-Forwarded-For header; a proxy appends
+   * to it rather than replacing it. Taking the leftmost entry — as this
+   * did — therefore reads a value the caller chose, so anyone could mint
+   * a fresh rate-limit and login-throttle bucket per request simply by
+   * varying it. Against the admin password that turned an 8-attempt
+   * lockout into no lockout at all.
+   *
+   * So: prefer a header only the platform can set, and when falling
+   * back to X-Forwarded-For take the RIGHTMOST entry, which is the one
+   * the hop nearest us wrote.
+   */
+  const platform =
+    headers.get("cf-connecting-ip") ??
+    headers.get("x-vercel-forwarded-for") ??
+    headers.get("x-real-ip");
+  if (platform?.trim()) return platform.trim();
+
   const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]!.trim();
-  return headers.get("x-real-ip") ?? headers.get("cf-connecting-ip") ?? "unknown";
+  if (forwarded) {
+    const hops = forwarded.split(",").map((h) => h.trim()).filter(Boolean);
+    const nearest = hops[hops.length - 1];
+    if (nearest) return nearest;
+  }
+
+  /*
+   * Nothing identifying available. Everyone shares one bucket, which
+   * throttles harder than intended rather than not at all — the safe
+   * direction to fail for a password gate.
+   */
+  return "unknown";
 }
 
 /* ------------------------------------------------------------------ */

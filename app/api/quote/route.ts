@@ -178,16 +178,24 @@ export async function POST(request: Request) {
       );
     }
 
-    if (idempotencyKey) rememberIdempotent(`${key}:${idempotencyKey}`, reference);
+    /*
+     * The store is the authority on the reference. If it had to re-mint
+     * because of a collision, the buyer must be given the one that was
+     * actually written — quoting anything else would pull up somebody
+     * else's request.
+     */
+    const storedReference = outcome.reference ?? reference;
+
+    if (idempotencyKey) rememberIdempotent(`${key}:${idempotencyKey}`, storedReference);
 
     console.info(
-      `[api/quote] ${reference} delivered via ${outcome.store ?? "notifier"}` +
+      `[api/quote] ${storedReference} delivered via ${outcome.store ?? "notifier"}` +
         `${outcome.notified.length ? `, notified: ${outcome.notified.join(",")}` : ""}` +
         `${outcome.notifyFailures.length ? `, notify failures: ${outcome.notifyFailures.join(",")}` : ""}` +
         ` (${Date.now() - started}ms)`,
     );
 
-    return NextResponse.json({ reference }, { status: 200 });
+    return NextResponse.json({ reference: storedReference }, { status: 200 });
   } catch (error) {
     // Never leak a stack trace to the browser.
     reportError(error, { scope: "api/quote", category: "unhandled", reference });

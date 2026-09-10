@@ -3,7 +3,7 @@ import type { Product } from "@/types/product";
 import type { LocaleCode } from "@/lib/i18n";
 import { defaultLocale } from "@/lib/i18n";
 import { getDictionaryFor } from "@/data/dictionaries";
-import { applyPatch } from "@/lib/product-schema";
+import { applyPatch, factsOnly } from "@/lib/product-schema";
 import { isSupabaseConfigured, selectRows } from "@/lib/server/supabase";
 import { reportError } from "@/lib/observability";
 
@@ -82,7 +82,17 @@ function patchProduct(
   let next = product;
 
   const base = overrides[`${product.slug}:${defaultLocale}`];
-  if (base) next = applyPatch(next, base, defaultLocale);
+  if (base) {
+    /*
+     * Under a translation, a base patch contributes FACTS only. It used
+     * to be applied whole, so editing the English tagline overwrote the
+     * committed Arabic one and /ar rendered partly in English until
+     * someone remembered to edit it there too. Availability and
+     * measurements still cross every language, because those are facts
+     * about the bale rather than about the wording.
+     */
+    next = applyPatch(next, locale === defaultLocale ? base : factsOnly(base), defaultLocale);
+  }
 
   if (locale !== defaultLocale) {
     const translation = overrides[`${product.slug}:${locale}`];

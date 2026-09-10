@@ -4,7 +4,7 @@ import { revalidatePath, updateTag } from "next/cache";
 import { PRODUCT_SPEC_KEYS } from "@/types/i18n";
 import { activeLocales, defaultLocale } from "@/lib/i18n";
 import { products } from "@/data/products";
-import { sanitisePatch, validatePatch, type PatchProblem } from "@/lib/product-schema";
+import { isClearable, sanitisePatch, validatePatch, type PatchProblem } from "@/lib/product-schema";
 import { deleteOverride, getOverride, recordAudit } from "@/lib/server/admin-data";
 import { OVERRIDES_TAG } from "@/lib/server/product-overrides";
 import { upsertRows } from "@/lib/server/supabase";
@@ -49,7 +49,15 @@ function buildPatch(formData: FormData, base: Record<string, unknown>, isBase: b
   for (const field of singles) {
     if (!formData.has(field)) continue;
     const value = text(formData.get(field));
-    if (value !== String(base[field] ?? "")) patch[field] = value;
+    const current = String(base[field] ?? "");
+    if (value === current) continue;
+    /*
+     * Emptying a field that the code fills in is a deliberate clear, and
+     * it is stored as null so applyPatch can delete it. Sending "" would
+     * be discarded by sanitisePatch and the committed value would come
+     * straight back, while the panel reported a successful save.
+     */
+    patch[field] = value === "" && current !== "" && isClearable(field) ? null : value;
   }
 
   const lists = isBase
@@ -70,7 +78,9 @@ function buildPatch(formData: FormData, base: Record<string, unknown>, isBase: b
     for (const field of ["availableFrom", "availableUntil"] as const) {
       if (!formData.has(field)) continue;
       const value = text(formData.get(field));
-      if (value !== String(base[field] ?? "")) patch[field] = value;
+      const current = String(base[field] ?? "");
+      if (value === current) continue;
+      patch[field] = value === "" && current !== "" ? null : value;
     }
   }
 

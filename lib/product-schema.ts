@@ -80,6 +80,40 @@ export const BASE_FIELDS = [
 
 export type BaseField = (typeof BASE_FIELDS)[number];
 
+/**
+ * The subset of a base patch that is a FACT about the product rather
+ * than English prose.
+ *
+ * A base patch is applied under every language, which is right for
+ * availability and measurements — a bale's supply state is not a
+ * translation. It is wrong for prose: editing the English tagline used
+ * to overwrite the committed Arabic one, turning /ar partly English
+ * until someone also edited it there. Only these fields cross the
+ * language boundary.
+ *
+ * `specs` is included because a spec row carries the measured value,
+ * which must be identical everywhere. patchProduct applies it in a way
+ * that still lets a locale keep its own translated label and prose
+ * value — see lib/server/product-overrides.ts.
+ */
+export const BASE_FACT_FIELDS = [
+  "availability",
+  "availableFrom",
+  "availableUntil",
+  "harvestSeason",
+  "featured",
+  "specs",
+] as const;
+
+/** Keep only the fields a base patch may contribute to another language. */
+export function factsOnly(patch: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const field of BASE_FACT_FIELDS) {
+    if (field in patch) out[field] = patch[field];
+  }
+  return out;
+}
+
 /** Fields a translation patch may set. Mirrors ProductTranslation. */
 export const TRANSLATION_FIELDS = [
   "name",
@@ -118,6 +152,32 @@ export const TEXT_LIMITS: Record<string, number> = {
 
 /** The longest a single list (features, bestFor, …) may become. */
 export const MAX_LIST_ITEMS = 24;
+
+/**
+ * Fields an editor may deliberately empty, restoring the committed
+ * value's ABSENCE rather than its content.
+ *
+ * Emptying a field used to produce an empty string, which sanitisePatch
+ * discarded — so the patch was written without it, the committed value
+ * reappeared, and the panel still said "Saved and published". A stale
+ * badge or availability note could never be removed. A clear is now
+ * stored as `null` and applyPatch deletes the field.
+ *
+ * The fields NOT listed here are ones a product cannot sensibly lack
+ * (its name, category, tagline, short description). Emptying one of
+ * those is rejected with a message rather than silently ignored.
+ */
+export const CLEARABLE_FIELDS = [
+  "badge",
+  "availabilityNote",
+  "harvestSeason",
+  "availableFrom",
+  "availableUntil",
+] as const;
+
+export function isClearable(field: string): boolean {
+  return (CLEARABLE_FIELDS as readonly string[]).includes(field);
+}
 
 /** Cap for one entry inside a list. Named so the checks below are total. */
 const LIST_ITEM_LIMIT = TEXT_LIMITS.listItem ?? 400;
@@ -243,6 +303,14 @@ export function validatePatch(
       continue;
     }
 
+    // `null` is a deliberate clear, not a missing value.
+    if (value === null) {
+      if (!isClearable(field)) {
+        problems.push({ field, message: "cannot be left empty" });
+      }
+      continue;
+    }
+
     if ((STRING_LISTS as readonly string[]).includes(field)) {
       checkStringList(field, value, problems);
       continue;
@@ -295,6 +363,12 @@ export function sanitisePatch(
 
   for (const [field, value] of Object.entries(patch)) {
     if (!allowed.includes(field)) continue;
+
+    if (value === null) {
+      // Carried through so applyPatch can delete the field.
+      if (isClearable(field)) clean[field] = null;
+      continue;
+    }
 
     if ((STRING_LISTS as readonly string[]).includes(field)) {
       if (!Array.isArray(value)) continue;
@@ -377,6 +451,12 @@ export function applyPatch(product: Product, patch: Record<string, unknown>, loc
   const next: Product = { ...product };
 
   for (const [field, value] of Object.entries(patch)) {
+    if (value === null) {
+      // A deliberate clear: the product renders as if the committed
+      // value were never there.
+      delete (next as unknown as Record<string, unknown>)[field];
+      continue;
+    }
     if (field === "specs") {
       const specs = value as Partial<Record<ProductSpecKey, Partial<{ label: string; value: string; note: string }>>>;
       for (const key of PRODUCT_SPEC_KEYS) {

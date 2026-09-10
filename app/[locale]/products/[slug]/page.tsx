@@ -13,7 +13,7 @@ import { getRelatedProducts, products } from "@/data/products";
 import { getCopy } from "@/lib/dictionary";
 import { setRequestLocale } from "@/lib/locale-server";
 import { getDictionaryFor } from "@/data/dictionaries";
-import { getProductsFor } from "@/lib/server/product-overrides";
+import { getProductFor, getProductsFor } from "@/lib/server/product-overrides";
 import { isActiveLocale } from "@/lib/i18n";
 import { breadcrumbJsonLd, buildMetadata, productJsonLd } from "@/lib/seo";
 import { visibleBatches } from "@/lib/spec-sheet";
@@ -31,9 +31,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug, locale } = await params;
   const active = isActiveLocale(locale) ? locale : "en";
   const dict = getDictionaryFor(active);
-  // The translated product — name, tagline and description in the
-  // reader's language, with the structural data unchanged.
-  const product = dict.products.find((p) => p.slug === slug);
+  /*
+   * The PATCHED product, not dict.products. Reading the committed
+   * catalogue here meant a name or search-listing edit made in the
+   * admin panel changed the page body but not its <title>, description,
+   * canonical or Open Graph tags — the panel said "Saved and published"
+   * while the thing search engines and link previews actually read was
+   * still the old copy.
+   */
+  const product = await getProductFor(active as never, slug);
   if (!product) return {};
   const formatLabels = dict.labels.format;
   const applicationLabels = dict.labels.application;

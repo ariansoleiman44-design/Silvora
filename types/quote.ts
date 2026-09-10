@@ -145,5 +145,14 @@ export interface SubmissionResult {
   ok: boolean;
   reference?: string;
   error?: string;
+  /**
+   * Per-field problems from the server's own validation.
+   *
+   * The browser's rules are a courtesy; the server's are the real gate,
+   * and the two do not always agree. Without this a 422 the client
+   * cannot reproduce is a dead end: a generic banner, every visible
+   * field looking correct, and no way to find out which one is wrong.
+   */
+  fields?: { field: string; message: string }[];
   mode: "api" | "mock" | "unconfigured";
 }

@@ -91,6 +91,31 @@ export interface InboxFilter {
 export const INBOX_PAGE_SIZE = 25;
 
 /**
+ * The PostgREST `or=` expression for a free-text inbox search, or an
+ * empty object when there is no term.
+ *
+ * It is a raw expression, not a column filter, so it must never be sent
+ * through the `where` encoder — that prefixes it with "eq." and
+ * PostgREST rejects the query. The term is QUOTED rather than having
+ * its punctuation stripped: commas, dots, parentheses and asterisks are
+ * all syntax here and a company name may legitimately contain them.
+ */
+function searchExpression(search: string | undefined): Record<string, string> {
+  const term = search?.trim().slice(0, 80);
+  if (!term) return {};
+  const quoted = quoteFilterValue(`*${term}*`);
+  return {
+    or: `(${[
+      `reference.ilike.${quoted}`,
+      `company.ilike.${quoted}`,
+      `buyer_name.ilike.${quoted}`,
+      `buyer_email.ilike.${quoted}`,
+      `buyer_phone.ilike.${quoted}`,
+    ].join(",")})`,
+  };
+}
+
+/**
  * One page of the inbox plus the unpaged total.
  *
  * The list view never selects `payload`: a page of 25 RFQs would other-
@@ -120,19 +145,7 @@ export async function listQuotes(filter: InboxFilter = {}): Promise<{
    * and asterisks are all syntax here, and a buyer's company name can
    * legitimately contain any of them.
    */
-  const raw: Record<string, string> = {};
-  const search = filter.search?.trim().slice(0, 80);
-  if (search) {
-    const term = quoteFilterValue(`*${search}*`);
-    raw.or = [
-      `reference.ilike.${term}`,
-      `company.ilike.${term}`,
-      `buyer_name.ilike.${term}`,
-      `buyer_email.ilike.${term}`,
-      `buyer_phone.ilike.${term}`,
-    ].join(",");
-    raw.or = `(${raw.or})`;
-  }
+  const raw = searchExpression(filter.search);
 
   const { rows, total } = await selectPage<QuoteRow>("quote_requests", {
     select:
@@ -180,10 +193,20 @@ export async function quotesForExport(filter: InboxFilter = {}): Promise<QuoteRo
   const where: Record<string, string> = {};
   if (filter.status && filter.status !== "all") where.status = filter.status;
 
+  /*
+   * The export must match the inbox the operator is looking at. It used
+   * to drop the search term, so "Export CSV" on a filtered view of one
+   * company handed over every buyer's name, email and phone number for
+   * the whole status instead — far more personal data than the screen
+   * showed, without saying so.
+   */
+  const raw = searchExpression(filter.search);
+
   return selectRows<QuoteRow>("quote_requests", {
     select:
       "reference,created_at,status,order_type,company,buyer_name,buyer_email,buyer_phone,country,line_count,internal_note",
     where,
+    raw,
     order: { column: "created_at", ascending: false },
     limit: EXPORT_LIMIT,
   });

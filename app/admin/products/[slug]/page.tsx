@@ -6,9 +6,9 @@ import { products } from "@/data/products";
 import { getDictionaryFor } from "@/data/dictionaries";
 import { activeLocales, defaultLocale, getLocale, isActiveLocale } from "@/lib/i18n";
 import { getOverride } from "@/lib/server/admin-data";
-import { isSupabaseConfigured, safeRead } from "@/lib/server/supabase";
+import { isSupabaseConfigured } from "@/lib/server/supabase";
 import { ProductEditor } from "./ProductEditor";
-import { NoDatabase } from "../../ui";
+import { NoDatabase, ReadFailed } from "../../ui";
 
 export async function generateMetadata({
   params,
@@ -53,9 +53,24 @@ export default async function ProductEditorPage({
   const fromCode =
     getDictionaryFor(locale as never).products.find((p) => p.slug === slug) ?? product;
 
-  const override = isSupabaseConfigured()
-    ? await safeRead(() => getOverride(slug, locale), null, "admin/product")
-    : null;
+  /*
+   * The stored patch is what the editor diffs against, so a failed read
+   * must NOT be treated as "no patch". It used to use safeRead, which
+   * swallows the error and returns null: the form then rendered the
+   * committed values as if the record were unedited, and the next save
+   * computed a patch of "no differences" and DELETED the real stored
+   * patch. A transient database blip silently discarded someone's work
+   * while the panel said it saved.
+   */
+  let override: Awaited<ReturnType<typeof getOverride>> = null;
+  let overrideFailed: string | null = null;
+  if (isSupabaseConfigured()) {
+    try {
+      override = await getOverride(slug, locale);
+    } catch (error) {
+      overrideFailed = error instanceof Error ? error.message : String(error);
+    }
+  }
 
   const baseline: Record<string, unknown> = {
     name: fromCode.name,
@@ -139,6 +154,13 @@ export default async function ProductEditorPage({
 
       {!isSupabaseConfigured() ? (
         <NoDatabase what="Saved edits" />
+      ) : overrideFailed ? (
+        /*
+         * Refusing to render the form is the point: an editable form
+         * built on an unknown baseline is how the stored patch gets
+         * destroyed on the next save.
+         */
+        <ReadFailed detail={overrideFailed} />
       ) : (
         <ProductEditor
           slug={slug}

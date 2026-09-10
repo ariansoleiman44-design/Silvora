@@ -91,9 +91,17 @@ export default async function RequestsPage({
           </Link>
         )}
         <span style={{ flex: 1 }} />
+        {/*
+          The export must match what is on screen — including the search
+          term. Sending only the status handed over every buyer in that
+          status instead of the ones being looked at.
+        */}
         <a
           className="admin-btn admin-btn-ghost"
-          href={`/admin/export${status !== "all" ? `?status=${status}` : ""}`}
+          href={`/admin/export?${new URLSearchParams({
+            ...(status !== "all" ? { status } : {}),
+            ...(search ? { q: search } : {}),
+          }).toString()}`}
         >
           Export CSV
         </a>

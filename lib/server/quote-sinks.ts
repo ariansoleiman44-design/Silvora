@@ -1,6 +1,7 @@
 import type { ContactRequest, QuoteRequest } from "@/types/quote";
 import { reportError } from "@/lib/observability";
 import { insertRows, isSupabaseConfigured, SupabaseError } from "@/lib/server/supabase";
+import { createServerReference } from "@/lib/server/reference";
 
 /**
  * WHERE AN RFQ GOES
@@ -25,8 +26,18 @@ import { insertRows, isSupabaseConfigured, SupabaseError } from "@/lib/server/su
 
 export interface QuoteStore {
   readonly name: string;
-  /** Persist the request. Throw to fail — the caller reports failure. */
-  save(request: QuoteRequest): Promise<void>;
+  /**
+   * Persist the request and return the reference actually stored.
+   *
+   * It returns a reference rather than void because a store may have to
+   * change it: if the minted reference collides with one already in the
+   * table, the record must be written under a new one and the BUYER must
+   * be told that new one. Silently keeping the old one hands them a
+   * reference belonging to somebody else's request.
+   *
+   * Throw to fail — the caller reports failure.
+   */
+  save(request: QuoteRequest): Promise<{ reference: string }>;
 }
 
 export interface QuoteNotifier {
@@ -76,6 +87,9 @@ function webhookStore(url: string): QuoteStore {
       if (!res.ok) {
         throw new Error(`Store webhook returned ${res.status}`);
       }
+      // A webhook has no uniqueness constraint to collide with, so the
+      // reference it was handed is the one that was stored.
+      return { reference: request.reference };
     },
   };
 }
@@ -95,6 +109,7 @@ const logStore: QuoteStore = {
       `${request.products.length} line(s)`,
       request.orderType,
     );
+    return { reference: request.reference };
   },
 };
 
@@ -114,28 +129,58 @@ function supabaseStore(): QuoteStore {
   return {
     name: "supabase",
     async save(request) {
-      try {
-        await insertRows("quote_requests", [
-          {
-            reference: request.reference,
-            created_at: request.createdAt,
-            status: "new",
-            order_type: request.orderType,
-            company: request.company || request.buyer.company || "",
-            buyer_name: request.buyer.name ?? "",
-            buyer_email: request.buyer.email ?? "",
-            buyer_phone: request.buyer.phone ?? "",
-            country: request.delivery?.country ?? "",
-            line_count: request.products.length,
-            payload: request,
-          },
-        ]);
-      } catch (error) {
-        // 409 = the reference is already stored. The record exists and
-        // is intact, which is exactly what save() promises.
-        if (error instanceof SupabaseError && error.status === 409) return;
-        throw error;
+      /*
+       * A 409 here is NOT "already saved". The reference is minted
+       * server-side per submission with a random suffix, so a collision
+       * means a DIFFERENT buyer's request already holds this reference.
+       * Treating it as success — as this did — dropped the second
+       * request entirely and handed that buyer the first one's
+       * reference. They would be told they were received, nothing would
+       * be stored, and quoting their reference would pull up someone
+       * else's order.
+       *
+       * So a collision re-mints and retries. Three attempts is far
+       * beyond plausible: the suffix is 4 characters from a 32-symbol
+       * alphabet, scoped to one day.
+       */
+      let reference = request.reference;
+
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const record = { ...request, reference };
+        try {
+          await insertRows("quote_requests", [
+            {
+              reference,
+              created_at: record.createdAt,
+              status: "new",
+              order_type: record.orderType,
+              company: record.company || record.buyer.company || "",
+              buyer_name: record.buyer.name ?? "",
+              buyer_email: record.buyer.email ?? "",
+              buyer_phone: record.buyer.phone ?? "",
+              country: record.delivery?.country ?? "",
+              line_count: record.products.length,
+              // The payload carries the same reference as the column, so
+              // the record is self-consistent after a re-mint.
+              payload: record,
+            },
+          ]);
+          return { reference };
+        } catch (error) {
+          if (error instanceof SupabaseError && error.status === 409) {
+            reportError(error, {
+              scope: "api/quote",
+              category: "reference-collision",
+              reference,
+            });
+            reference = createServerReference("CF");
+            continue;
+          }
+          throw error;
+        }
       }
+
+      throw new Error("Could not store the request: reference collided three times.");
     },
   };
 }
@@ -253,6 +298,12 @@ export function resolveNotifiers(): QuoteNotifier[] {
 export interface DeliveryOutcome {
   /** False means the caller must NOT report success to the buyer. */
   delivered: boolean;
+  /**
+   * The reference actually persisted. It can differ from the one that
+   * was minted if the store had to re-mint on a collision, and it is
+   * this value — never the original — that the buyer must be shown.
+   */
+  reference?: string;
   /** "not_configured" when there is nowhere for an RFQ to go. */
   reason?: "not_configured" | "store_failed" | "notify_failed";
   store?: string;
@@ -283,9 +334,12 @@ export async function deliverQuote(request: QuoteRequest): Promise<DeliveryOutco
     return { delivered: false, reason: "not_configured", notified: [], notifyFailures: [] };
   }
 
+  let storedReference = request.reference;
+
   if (store) {
     try {
-      await store.save(request);
+      const saved = await store.save(request);
+      storedReference = saved.reference;
     } catch (error) {
       reportError(error, {
         scope: "api/quote",
@@ -325,7 +379,7 @@ export async function deliverQuote(request: QuoteRequest): Promise<DeliveryOutco
     return { delivered: false, reason: "notify_failed", notified, notifyFailures };
   }
 
-  return { delivered: true, store: store?.name, notified, notifyFailures };
+  return { delivered: true, reference: storedReference, store: store?.name, notified, notifyFailures };
 }
 
 /* ------------------------------------------------------------------ */

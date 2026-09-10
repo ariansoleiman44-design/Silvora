@@ -205,6 +205,8 @@ function createApiProvider(endpoint: string): FormsProvider {
         return {
           ok: false,
           error: body.error ?? `Request failed (${res.status})`,
+          // Passed through so a form can mark the offending input.
+          fields: Array.isArray(body.fields) ? body.fields : undefined,
           mode: "api",
         };
       }

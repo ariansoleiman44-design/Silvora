@@ -46,8 +46,9 @@ export async function GET(request: NextRequest) {
 
   const statusParam = request.nextUrl.searchParams.get("status");
   const status = isQuoteStatus(statusParam) ? statusParam : "all";
+  const search = request.nextUrl.searchParams.get("q") ?? "";
 
-  const rows = await quotesForExport({ status });
+  const rows = await quotesForExport({ status, search });
 
   const header = COLUMNS.join(",");
   const body = rows
@@ -56,16 +57,27 @@ export async function GET(request: NextRequest) {
 
   // A BOM so Excel opens UTF-8 correctly — without it Arabic and
   // Kurdish company names arrive as mojibake.
-  const csv = `﻿${header}\r\n${body}\r\n`;
+  const csvBody = `﻿${header}\r\n${body}\r\n`;
+
+  const truncated = rows.length >= EXPORT_LIMIT;
 
   await recordAudit({
     action: "quote.export",
-    target: status,
-    after: { rows: rows.length, truncated: rows.length >= EXPORT_LIMIT },
+    target: search ? `${status} q=${search}` : status,
+    after: { rows: rows.length, truncated },
   });
 
+  /*
+   * A silent cap reads as "this is everything". If the export hit the
+   * limit, say so in the file itself — the person downloading it is the
+   * only one who can act on it.
+   */
+  const notice = truncated
+    ? `\r\n"NOTE: this export was capped at ${EXPORT_LIMIT} rows. Narrow the filter or search to get the rest."\r\n`
+    : "";
+
   const stamp = new Date().toISOString().slice(0, 10);
-  return new NextResponse(csv, {
+  return new NextResponse(csvBody + notice, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="corn-fodder-requests-${status}-${stamp}.csv"`,
