@@ -1,6 +1,6 @@
 import type { Availability, Product } from "@/types/product";
 import type { ProductSpecKey, ProductTranslation } from "@/types/i18n";
-import { PRODUCT_SPEC_KEYS } from "@/types/i18n";
+import { PRODUCT_SPEC_KEYS } from "../types/i18n.ts";
 
 /**
  * WHAT THE ADMIN PANEL IS ALLOWED TO CHANGE
@@ -130,10 +130,22 @@ export const TRANSLATION_FIELDS = [
   "availabilityNote",
   "seo",
   "specs",
+  /*
+   * Both of these ARE translated by the file overlays and applied by
+   * translateProduct in data/dictionaries.ts. They were missing here,
+   * so the panel would have rejected a legitimate translation that the
+   * committed files already contain — found by running validate:data
+   * against the overlays with this very module.
+   */
+  "faq",
+  "nutritionLabels",
 ] as const;
 
 /** Free-text fields, and the cap each one is held to. */
 export const TEXT_LIMITS: Record<string, number> = {
+  faqQuestion: 300,
+  faqAnswer: 1500,
+  nutritionLabel: 80,
   name: 120,
   shortName: 60,
   category: 80,
@@ -266,6 +278,56 @@ function checkSpecs(value: unknown, problems: PatchProblem[]): void {
   }
 }
 
+/** Per-product FAQ: a list of {question, answer}, both required. */
+function checkFaq(value: unknown, problems: PatchProblem[]): void {
+  if (!Array.isArray(value)) {
+    problems.push({ field: "faq", message: "must be a list" });
+    return;
+  }
+  if (value.length > MAX_LIST_ITEMS) {
+    problems.push({ field: "faq", message: `must have ${MAX_LIST_ITEMS} entries or fewer` });
+  }
+  value.forEach((entry, index) => {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+      problems.push({ field: `faq[${index}]`, message: "must be an object" });
+      return;
+    }
+    const item = entry as Record<string, unknown>;
+    for (const prop of ["question", "answer"] as const) {
+      if (!(prop in item)) {
+        problems.push({ field: `faq[${index}].${prop}`, message: "is required" });
+        continue;
+      }
+      checkText(
+        `faq[${index}].${prop}`,
+        item[prop],
+        problems,
+        prop === "question" ? "faqQuestion" : "faqAnswer",
+      );
+    }
+    for (const prop of Object.keys(item)) {
+      if (prop !== "question" && prop !== "answer") {
+        problems.push({ field: `faq[${index}].${prop}`, message: "is not an editable property" });
+      }
+    }
+  });
+}
+
+/**
+ * Nutrition LABELS only — the machine key and the measured number stay
+ * in data/products.ts. Translating "Crude protein" is language work;
+ * changing 7.8 is not.
+ */
+function checkNutritionLabels(value: unknown, problems: PatchProblem[]): void {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    problems.push({ field: "nutritionLabels", message: "must be an object keyed by nutrition key" });
+    return;
+  }
+  for (const [key, label] of Object.entries(value as Record<string, unknown>)) {
+    checkText(`nutritionLabels.${key}`, label, problems, "nutritionLabel");
+  }
+}
+
 function checkSeo(value: unknown, problems: PatchProblem[]): void {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     problems.push({ field: "seo", message: "must be an object" });
@@ -322,6 +384,12 @@ export function validatePatch(
         break;
       case "seo":
         checkSeo(value, problems);
+        break;
+      case "faq":
+        checkFaq(value, problems);
+        break;
+      case "nutritionLabels":
+        checkNutritionLabels(value, problems);
         break;
       case "availability":
         if (!AVAILABILITY_VALUES.includes(value as Availability)) {
@@ -403,6 +471,28 @@ export function sanitisePatch(
       continue;
     }
 
+    if (field === "faq" && Array.isArray(value)) {
+      const entries = value
+        .filter((e): e is Record<string, unknown> => typeof e === "object" && e !== null && !Array.isArray(e))
+        .map((e) => ({
+          question: typeof e.question === "string" ? e.question.trim() : "",
+          answer: typeof e.answer === "string" ? e.answer.trim() : "",
+        }))
+        // A half-filled entry would render a question with no answer.
+        .filter((e) => e.question && e.answer);
+      if (entries.length) clean.faq = entries;
+      continue;
+    }
+
+    if (field === "nutritionLabels" && typeof value === "object" && value !== null && !Array.isArray(value)) {
+      const labels: Record<string, string> = {};
+      for (const [key, label] of Object.entries(value as Record<string, unknown>)) {
+        if (typeof label === "string" && label.trim()) labels[key] = label.trim();
+      }
+      if (Object.keys(labels).length) clean.nutritionLabels = labels;
+      continue;
+    }
+
     if (field === "featured") {
       if (typeof value === "boolean") clean.featured = value;
       continue;
@@ -467,6 +557,22 @@ export function applyPatch(product: Product, patch: Record<string, unknown>, loc
     }
     if (field === "seo") {
       next.seo = { ...product.seo, ...(value as { title?: string; description?: string }) };
+      continue;
+    }
+    if (field === "nutritionLabels") {
+      /*
+       * There is no `nutritionLabels` field on Product — the labels live
+       * on each nutrition entry. Mirrors translateProduct in
+       * data/dictionaries.ts. Assigning it generically would have set a
+       * field nothing reads and silently lost every translated label.
+       *
+       * Only the LABEL is taken. The key and the measured number are
+       * facts and stay exactly as committed.
+       */
+      if (product.nutrition) {
+        const labels = value as Record<string, string>;
+        next.nutrition = product.nutrition.map((n) => ({ ...n, label: labels[n.key] ?? n.label }));
+      }
       continue;
     }
     // Every remaining allowed field maps one-for-one onto Product.

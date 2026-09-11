@@ -15,6 +15,7 @@
  * a deploy.
  */
 import { products } from "../data/products.ts";
+import { validatePatch } from "../lib/product-schema.ts";
 import { formatLabels } from "../data/product-labels.ts";
 import { media } from "../data/media.ts";
 import { caseStudies } from "../data/case-studies.ts";
@@ -270,6 +271,22 @@ for (const t of TRANSLATIONS) {
   for (const slug of Object.keys(t.products)) {
     if (!slugs.has(slug)) {
       error(where, `translation for unknown product "${slug}" — a renamed or deleted slug?`);
+    }
+  }
+
+  /*
+   * The committed overlays are held to the SAME rules the admin panel
+   * enforces on an edit, using the same module — lib/product-schema.ts.
+   *
+   * Without this the two could disagree: a field could sit in a file
+   * overlay that the panel would reject, and nobody would find out
+   * until someone opened that product in the editor and could not save
+   * it. Length caps, unknown fields and untranslatable facts are all
+   * caught here instead.
+   */
+  for (const [slug, patch] of Object.entries(t.products)) {
+    for (const problem of validatePatch(patch as Record<string, unknown>, t.code)) {
+      error(where, `${slug}: ${problem.field} ${problem.message}`);
     }
   }
 

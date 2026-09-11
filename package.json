@@ -11,9 +11,10 @@
     "typecheck": "tsc --noEmit",
     "validate:data": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validate-data.mts",
     "launch:audit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/launch-audit.mts",
-    "preflight": "npm run validate:data && npm run typecheck && npm run lint && npm run launch:audit",
+    "preflight": "npm run test && npm run validate:data && npm run typecheck && npm run lint && npm run launch:audit",
     "i18n:review": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/i18n-review.mts",
-    "admin:password": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/admin-password.mts"
+    "admin:password": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/admin-password.mts",
+    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/*.test.mts"
   },
   "dependencies": {
     "framer-motion": "^12.43.0",

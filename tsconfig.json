@@ -12,6 +12,10 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noEmit": true,
+    // Lets a module that the app imports also be imported by plain Node
+    // (tests, scripts) via a relative ".ts" path. Safe only because
+    // noEmit is true — tsc never writes output here; Next builds.
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
