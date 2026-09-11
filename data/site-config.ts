@@ -151,8 +151,17 @@ export const siteConfig = {
    * showing a disabled control.
    */
   features: {
-    /** See QuoteServiceMode. Overridden to "api" when an endpoint exists. */
-    quoteServiceMode: "mock" as QuoteServiceMode,
+    /**
+     * See QuoteServiceMode. "api" means the forms post to /api/quote for
+     * real; "mock" keeps them in the browser and a production build then
+     * refuses to submit at all.
+     *
+     * Switched to "api" now that a durable store exists. It is safe with
+     * or without one: with nothing configured the route answers 503
+     * not_configured and the site tells the visitor plainly that nothing
+     * was sent, rather than pretending.
+     */
+    quoteServiceMode: "api" as QuoteServiceMode,
     /**
      * Optional EXTERNAL endpoint. Leave empty to use this app's own
      * /api/quote route, which is the normal setup.
