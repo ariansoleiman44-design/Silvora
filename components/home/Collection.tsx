@@ -37,7 +37,10 @@ export function Collection() {
             key={p.id}
             className="flex w-[78vw] max-w-[22rem] shrink-0 snap-start sm:w-[46vw] lg:w-auto lg:max-w-none"
           >
-            <ProductCard product={p} index={i} variant="shelf" priority={i < 2} />
+            {/* No priority: this shelf is below the fold, and preloading two
+                cards put 122 KB on the LCP path — 1.4x the hero itself on a
+                phone — competing with the image that actually is the LCP. */}
+            <ProductCard product={p} index={i} variant="shelf" />
           </RevealItem>
         ))}
       </RevealGroup>

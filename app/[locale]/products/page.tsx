@@ -42,7 +42,7 @@ export default async function ProductsPage({
   const t = copy.products;
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }])} />
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }], locale as never)} />
       <PageHero
         eyebrow={t.eyebrow}
         lines={t.headline}

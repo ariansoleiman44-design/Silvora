@@ -103,7 +103,7 @@ export default async function ProductPage({ params }: Params) {
             { name: "Home", path: "/" },
             { name: "Products", path: "/products" },
             { name: product.name, path: `/products/${product.slug}` },
-          ]),
+          ], locale as never),
         ]}
       />
 

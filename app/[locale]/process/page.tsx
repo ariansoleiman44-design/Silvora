@@ -39,7 +39,7 @@ export default async function ProcessPage({
   const t = copy.processPage;
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Our Process", path: "/process" }])} />
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Our Process", path: "/process" }], locale as never)} />
       <PageHero eyebrow={t.eyebrow} lines={t.headline} intro={t.intro} image="processHero" size="md" italicLast />
       <FieldToFeed />
       <PerfectBale />

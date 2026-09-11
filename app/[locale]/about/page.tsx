@@ -45,7 +45,7 @@ export default async function AboutPage({
   const t = copy.about;
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "About", path: "/about" }])} />
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "About", path: "/about" }], locale as never)} />
       <PageHero eyebrow={t.eyebrow} lines={t.headline} intro={t.intro} image="aboutHero" size="lg" position="50% 55%" />
 
       {/* Manifesto */}

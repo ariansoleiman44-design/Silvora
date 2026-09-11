@@ -48,7 +48,7 @@ export default async function LogisticsPage({
   const areas = siteConfig.serviceAreas;
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Logistics", path: "/logistics" }])} />
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Logistics", path: "/logistics" }], locale as never)} />
       <PageHero eyebrow={t.eyebrow} lines={t.headline} intro={t.intro} image="logisticsHero" size="md" position="50% 60%" />
 
       <section className="section-y bg-cream text-ink">

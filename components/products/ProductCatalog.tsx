@@ -211,7 +211,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
                     exit={reduce ? undefined : { opacity: 0, scale: 0.98 }}
                     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <ProductCard product={p} index={i} priority={i < 2} headingLevel={2} />
+                    <ProductCard product={p} index={i} headingLevel={2} />
                   </m.li>
                 ))}
               </AnimatePresence>

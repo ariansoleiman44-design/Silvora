@@ -65,7 +65,7 @@ export default async function ContactPage({
 
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }])} />
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }], locale as never)} />
       <PageHero eyebrow={t.eyebrow} lines={t.headline} intro={t.intro} image="contactHero" size="md" italicLast />
 
       <section className="bg-cream py-14 text-ink md:py-24">

@@ -59,7 +59,7 @@ export default async function QualityPage({
   const t = copy.qualityPage;
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Quality", path: "/quality" }])} />
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Quality", path: "/quality" }], locale as never)} />
       <PageHero eyebrow={t.eyebrow} lines={t.headline} intro={t.intro} image="qualityHero" size="lg" position="60% 50%" />
 
       {/* Nine chapters */}

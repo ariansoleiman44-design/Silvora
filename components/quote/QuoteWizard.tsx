@@ -92,6 +92,14 @@ export function QuoteWizard() {
     if (!q.hydrated || startedRef.current) return;
     startedRef.current = true;
     idempotencyRef.current = createIdempotencyKey();
+    /*
+     * Stamped at mount, which is wrong for a RESTORED draft: the buyer
+     * already filled this in on an earlier visit, so they can tap
+     * through the remaining steps in a second or two and trip the
+     * three-second floor. It is re-stamped on their first real edit
+     * below, so the clock measures time spent filling the form rather
+     * than time since the page opened.
+     */
     formStartedAtRef.current = Date.now();
     q.ensureReference();
     track("quote_started", { orderType: q.request.orderType, lines: q.items.length });
@@ -110,16 +118,38 @@ export function QuoteWizard() {
     return Object.keys(next).length === 0;
   }, [q.request.buyer, t.contact]);
 
+  /*
+   * The current step, mirrored outside React state so `goTo` can read it
+   * without the side effect below living inside a setState updater.
+   * Updaters must be pure — that one pushed a history entry, so under
+   * StrictMode it pushed two.
+   */
+  const stepRef = useRef(0);
+
   const goTo = useCallback(
     (index: number) => {
-      setStep((current) => {
-        // Each step becomes a history entry, so the phone's back gesture
-        // steps backwards through the flow instead of abandoning it.
-        if (index !== current) {
-          window.history.pushState({ cornFodderStep: index }, "");
-        }
-        return index;
-      });
+      const current = stepRef.current;
+      if (index === current) return;
+
+      /*
+       * History has to be DIRECTION-AWARE. Every navigation used to
+       * push, including backwards ones, so walking 0→1→2 and then
+       * tapping Back left the stack as 0,1,2,1 — the phone's back
+       * gesture moved the buyer FORWARD again, and no amount of backing
+       * out ever left the wizard.
+       *
+       * Going forward pushes. Going back asks the browser to go back and
+       * lets the popstate listener move the step, so the stack shrinks
+       * the way the buyer expects.
+       */
+      if (index < current) {
+        window.history.back();
+        return;
+      }
+
+      stepRef.current = index;
+      setStep(index);
+      window.history.pushState({ cornFodderStep: index }, "");
       // Keep the step heading in view without yanking the whole page.
       topRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
     },
@@ -131,7 +161,11 @@ export function QuoteWizard() {
     window.history.replaceState({ cornFodderStep: 0 }, "");
     const onPop = (e: PopStateEvent) => {
       const state = e.state as { cornFodderStep?: number } | null;
-      if (typeof state?.cornFodderStep === "number") setStep(state.cornFodderStep);
+      if (typeof state?.cornFodderStep === "number") {
+        stepRef.current = state.cornFodderStep;
+        setStep(state.cornFodderStep);
+        topRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
+      }
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);

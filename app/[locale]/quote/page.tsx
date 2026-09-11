@@ -39,7 +39,7 @@ export default async function QuotePage({
   const t = copy.rfq;
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Request a Quote", path: "/quote" }])} />
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Request a Quote", path: "/quote" }], locale as never)} />
       <PageHero eyebrow={t.eyebrow} lines={t.headline} intro={t.intro} image="quoteHero" size="sm" position="50% 45%" />
       <section className="bg-cream py-14 text-ink md:py-24">
         <div className="container-x">

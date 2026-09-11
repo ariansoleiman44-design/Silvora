@@ -54,7 +54,7 @@ export default async function ResultsPage({
 
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Results", path: "/results" }])} />
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Results", path: "/results" }], locale as never)} />
       <PageHero
         eyebrow="Results"
         lines={["Fed, measured,", "repeated."]}

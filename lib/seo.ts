@@ -4,6 +4,7 @@ import { isEmailConfigured, isPhoneConfigured, normalizePhone } from "@/lib/cont
 import { absoluteUrl, siteOrigin } from "@/lib/site-url";
 import { activeLocales, defaultLocale, getLocale, localePath, type LocaleCode } from "@/lib/i18n";
 import { media } from "@/data/media";
+import { getDictionaryFor } from "@/data/dictionaries";
 import type { Product } from "@/types/product";
 import type { Faq } from "@/data/faqs";
 import { formatLabels } from "@/data/product-labels";
@@ -99,7 +100,10 @@ export function organizationJsonLd() {
     name: legal.name,
     alternateName: siteConfig.brandName,
     url: siteOrigin,
-    logo: absoluteUrl("/icon.svg"),
+    // app/icon.png — there is no SVG in this project; /icon.svg 404s, and
+    // this node renders on every page, so search engines saw a broken
+    // logo sitewide.
+    logo: absoluteUrl("/icon.png"),
     description: siteConfig.statement,
     ...(isEmailConfigured() ? { email: siteConfig.contact.email } : {}),
     ...(isPhoneConfigured() ? { telephone: normalizePhone(siteConfig.contact.phone) } : {}),
@@ -172,15 +176,37 @@ export function faqJsonLd(items: Faq[]) {
   };
 }
 
-export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
+/**
+ * Breadcrumb trail for one page.
+ *
+ * `locale` is required in practice: without it every localized page
+ * emitted English URLs, so /ar/about — whose canonical is the Arabic
+ * URL — published a trail pointing at /about. The structured data
+ * contradicted the canonical on three quarters of the site.
+ */
+/** The translated label for a crumb, falling back to what was passed. */
+function crumbName(item: { name: string; path: string }, locale: LocaleCode): string {
+  const dict = getDictionaryFor(locale);
+  if (item.path === "/") return dict.copy.product?.breadcrumbHome ?? item.name;
+  const match = dict.nav.main.find((entry) => entry.href === item.path);
+  return match?.label ?? item.name;
+}
+
+export function breadcrumbJsonLd(
+  items: { name: string; path: string }[],
+  locale: LocaleCode = defaultLocale,
+) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: items.map((item, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      name: item.name,
-      item: absoluteUrl(item.path),
+      // Callers pass English labels. The translated one already exists
+      // in the nav dictionary, keyed by the same href, so resolve it
+      // here rather than making nine pages each do it.
+      name: crumbName(item, locale),
+      item: absoluteUrl(localePath(item.path, locale)),
     })),
   };
 }

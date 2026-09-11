@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useId, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import { useId, type ComponentPropsWithoutRef, type ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -260,6 +260,9 @@ export function NumberField({
   className?: string;
 }) {
   const id = useId();
+  // The in-progress string while the field has focus; null when not
+  // being edited, so the committed number shows through.
+  const [draft, setDraft] = useState<string | null>(null);
   const clampVal = (v: number) => Math.min(max, Math.max(min, v));
   const btn = cn(
     "grid h-11 w-11 shrink-0 place-items-center rounded-full border text-lg leading-none transition-colors",
@@ -287,10 +290,30 @@ export function NumberField({
             min={min}
             max={max}
             step={step}
-            value={Number.isFinite(value) ? value : ""}
+            /*
+             * While the field has focus the raw string is shown as typed
+             * and only the UPPER bound is applied; the lower bound waits
+             * for blur.
+             *
+             * Clamping up to `min` on every keystroke made larger values
+             * impossible to enter. With min=50, typing 7-0-0 for 700 went
+             * "7" -> clamped to 50 -> the controlled input became "50",
+             * and the next keystrokes appended to that. The buyer could
+             * not type the number they wanted and usually did not notice
+             * the field had rewritten itself.
+             */
+            value={draft ?? (Number.isFinite(value) ? String(value) : "")}
+            onFocus={() => setDraft(Number.isFinite(value) ? String(value) : "")}
             onChange={(e) => {
-              const n = parseFloat(e.target.value);
-              onChange(Number.isFinite(n) ? clampVal(n) : 0);
+              const raw = e.target.value;
+              setDraft(raw);
+              const n = parseFloat(raw);
+              if (Number.isFinite(n)) onChange(Math.min(n, max));
+            }}
+            onBlur={() => {
+              const n = parseFloat(draft ?? "");
+              onChange(Number.isFinite(n) ? clampVal(n) : clampVal(value));
+              setDraft(null);
             }}
             className={cn(controlCls(tone), "mono-num pe-12 text-center text-lg")}
           />

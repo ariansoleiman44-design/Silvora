@@ -108,11 +108,20 @@ export async function POST(request: Request) {
     honeypot: payload.website,
     formStartedAt: payload.formStartedAt,
   });
-  if (bot.bot) {
-    // Answer like a success so automation gains no signal, but nothing
-    // is stored, sent, or given a real reference.
-    console.warn(`[api/quote] rejected bot signal: ${bot.signal}`);
+  if (bot.bot && bot.discard) {
+    // Only the honeypot gets here — a field no person can see. Answer
+    // like a success so automation gains no signal, but store nothing,
+    // send nothing, and give no real reference.
+    console.warn(`[api/quote] discarded bot signal: ${bot.signal}`);
     return NextResponse.json({ reference: createServerReference("CF") }, { status: 200 });
+  }
+  if (bot.bot) {
+    // Suspicious but not conclusive — most often a returning buyer with
+    // a restored draft. Logged and then processed exactly like any
+    // other request: it is far better to store a little spam than to
+    // show a real buyer a reference number for a request that was
+    // thrown away.
+    console.warn(`[api/quote] suspicious but accepted: ${bot.signal}`);
   }
 
   /*

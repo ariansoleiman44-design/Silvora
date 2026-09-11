@@ -75,11 +75,34 @@ export function clientKey(headers: Headers): string {
    * back to X-Forwarded-For take the RIGHTMOST entry, which is the one
    * the hop nearest us wrote.
    */
-  const platform =
-    headers.get("cf-connecting-ip") ??
-    headers.get("x-vercel-forwarded-for") ??
-    headers.get("x-real-ip");
-  if (platform?.trim()) return platform.trim();
+  /*
+   * A VENDOR HEADER IS ONLY TRUSTWORTHY WHEN THAT VENDOR IS IN FRONT.
+   *
+   * Reading cf-connecting-ip / x-real-ip unconditionally reopened the
+   * very hole the note above describes, one header higher up: on Vercel
+   * — which the README names first — Cloudflare is not in front, so
+   * nothing strips an inbound `cf-connecting-ip`. A caller could send a
+   * different one per request and mint a fresh bucket every time,
+   * turning the admin login's 8-attempt lockout back into no lockout.
+   *
+   * So each is read only on evidence that the proxy which owns it is
+   * actually there: VERCEL is set by Vercel itself, and Cloudflare or
+   * another reverse proxy has to be declared with TRUSTED_PROXY.
+   */
+  const trustedProxy = (process.env.TRUSTED_PROXY ?? "").trim().toLowerCase();
+
+  if (process.env.VERCEL) {
+    const vercel = headers.get("x-vercel-forwarded-for")?.trim();
+    if (vercel) return vercel;
+  }
+  if (trustedProxy === "cloudflare") {
+    const cf = headers.get("cf-connecting-ip")?.trim();
+    if (cf) return cf;
+  }
+  if (trustedProxy === "nginx" || trustedProxy === "proxy") {
+    const real = headers.get("x-real-ip")?.trim();
+    if (real) return real;
+  }
 
   const forwarded = headers.get("x-forwarded-for");
   if (forwarded) {
@@ -134,6 +157,11 @@ export function rememberIdempotent(key: string, reference: string, now = Date.no
 const MIN_FILL_MS = 3_000;
 
 export interface BotCheck {
+  /**
+   * Whether the request should be silently dropped. Only the honeypot
+   * earns this: weaker signals must let a real buyer through.
+   */
+  discard: boolean;
   bot: boolean;
   signal?: "honeypot" | "too-fast";
 }
@@ -151,12 +179,29 @@ export interface BotCheck {
  */
 export function checkBotSignals(input: { honeypot?: unknown; formStartedAt?: unknown }): BotCheck {
   if (typeof input.honeypot === "string" && input.honeypot.trim() !== "") {
-    return { bot: true, signal: "honeypot" };
+    // Conclusive: the field is hidden from people.
+    return { bot: true, signal: "honeypot", discard: true };
   }
   const started = Number(input.formStartedAt);
   if (Number.isFinite(started) && started > 0) {
     const elapsed = Date.now() - started;
-    if (elapsed >= 0 && elapsed < MIN_FILL_MS) return { bot: true, signal: "too-fast" };
+    if (elapsed >= 0 && elapsed < MIN_FILL_MS) {
+      /*
+       * Suspicious, NOT conclusive — and it must never discard.
+       *
+       * A returning buyer whose draft was restored from localStorage has
+       * their name and phone already filled, so they can tap through the
+       * remaining steps in well under three seconds. The route used to
+       * answer 200 with an invented reference for this, which meant a
+       * real buyer was shown a confirmation screen and a reference
+       * number while nothing whatsoever was stored or sent. A lost sale
+       * that looks to everyone like a completed one is the worst
+       * outcome this system can produce.
+       *
+       * It is still reported so the signal can be watched in the logs.
+       */
+      return { bot: true, signal: "too-fast", discard: false };
+    }
   }
-  return { bot: false };
+  return { bot: false, discard: false };
 }
