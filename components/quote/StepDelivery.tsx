@@ -3,6 +3,7 @@
 import { ChoiceGroup, TextArea, TextField } from "@/components/ui/Field";
 import { useQuote } from "@/lib/quote-store";
 import { useCopy } from "@/lib/locale-client";
+import { FIELD_LIMITS } from "@/lib/form-limits";
 
 /**
  * Step 3 — where the load is going and whether it can be unloaded.
@@ -24,18 +25,21 @@ export function StepDelivery() {
 
       <div className="mt-8 grid gap-8 sm:grid-cols-2">
         <TextField
+          maxLength={FIELD_LIMITS.maxShortText}
           label={t.country}
           value={d.country}
           onChange={(e) => q.patchDelivery({ country: e.target.value })}
           autoComplete="country-name"
         />
         <TextField
+          maxLength={FIELD_LIMITS.maxShortText}
           label={t.region}
           value={d.region}
           onChange={(e) => q.patchDelivery({ region: e.target.value })}
           autoComplete="address-level2"
         />
         <TextField
+          maxLength={FIELD_LIMITS.maxShortText}
           label={t.preferredDate}
           hint={t.preferredDateHint}
           type="date"
@@ -53,6 +57,7 @@ export function StepDelivery() {
           ]}
         />
         <TextArea
+          maxLength={FIELD_LIMITS.maxNotes}
           label={t.notes}
           rows={4}
           placeholder={t.notesPlaceholder}

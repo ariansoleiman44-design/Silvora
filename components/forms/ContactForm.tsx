@@ -8,6 +8,7 @@ import { TextArea, TextField } from "@/components/ui/Field";
 import { createIdempotencyKey, quoteService } from "@/lib/quote-service";
 import { useCopy } from "@/lib/locale-client";
 import type { ContactRequest, SubmissionResult } from "@/types/quote";
+import { FIELD_LIMITS } from "@/lib/form-limits";
 
 type Status = "idle" | "sending" | "success" | "error";
 
@@ -121,13 +122,13 @@ export function ContactForm() {
   return (
     <form onSubmit={submit} noValidate>
       <div className="grid gap-8 sm:grid-cols-2">
-        <TextField label={f.name} required value={values.name} onChange={set("name")} error={errors.name} autoComplete="name" />
-        <TextField label={f.company} value={values.company} onChange={set("company")} autoComplete="organization" />
-        <TextField label={f.phone} type="tel" inputMode="tel" value={values.phone} onChange={set("phone")} autoComplete="tel" />
-        <TextField label={f.email} type="email" inputMode="email" value={values.email} onChange={set("email")} error={errors.email} autoComplete="email" />
-        <TextField label={f.country} value={values.country} onChange={set("country")} autoComplete="country-name" />
-        <TextField label={f.city} value={values.city} onChange={set("city")} autoComplete="address-level2" />
-        <TextArea label={f.message} required value={values.message} onChange={set("message")} error={errors.message} className="sm:col-span-2" rows={5} />
+        <TextField label={f.name} required maxLength={FIELD_LIMITS.maxShortText} value={values.name} onChange={set("name")} error={errors.name} autoComplete="name" />
+        <TextField label={f.company} maxLength={FIELD_LIMITS.maxShortText} value={values.company} onChange={set("company")} autoComplete="organization" />
+        <TextField label={f.phone} type="tel" inputMode="tel" maxLength={FIELD_LIMITS.maxPhone} value={values.phone} onChange={set("phone")} autoComplete="tel" />
+        <TextField label={f.email} type="email" inputMode="email" maxLength={FIELD_LIMITS.maxEmail} value={values.email} onChange={set("email")} error={errors.email} autoComplete="email" />
+        <TextField label={f.country} maxLength={FIELD_LIMITS.maxShortText} value={values.country} onChange={set("country")} autoComplete="country-name" />
+        <TextField label={f.city} maxLength={FIELD_LIMITS.maxShortText} value={values.city} onChange={set("city")} autoComplete="address-level2" />
+        <TextArea label={f.message} required maxLength={FIELD_LIMITS.maxNotes} value={values.message} onChange={set("message")} error={errors.message} className="sm:col-span-2" rows={5} />
       </div>
       <AnimatePresence>
         {status === "error" && (

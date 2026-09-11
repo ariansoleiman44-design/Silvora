@@ -4,6 +4,7 @@ import { TextArea, TextField } from "@/components/ui/Field";
 import { useQuote } from "@/lib/quote-store";
 import { siteConfig } from "@/data/site-config";
 import { useCopy } from "@/lib/locale-client";
+import { FIELD_LIMITS } from "@/lib/form-limits";
 
 export interface ContactErrors {
   name?: string;
@@ -31,6 +32,7 @@ export function StepContact({ errors }: { errors: ContactErrors }) {
 
       <div className="mt-8 grid gap-8 sm:grid-cols-2">
         <TextField
+          maxLength={FIELD_LIMITS.maxShortText}
           label={t.name}
           required
           value={b.name}
@@ -39,12 +41,14 @@ export function StepContact({ errors }: { errors: ContactErrors }) {
           autoComplete="name"
         />
         <TextField
+          maxLength={FIELD_LIMITS.maxShortText}
           label={t.company}
           value={b.company}
           onChange={(e) => q.patchBuyer({ company: e.target.value })}
           autoComplete="organization"
         />
         <TextField
+          maxLength={FIELD_LIMITS.maxPhone}
           label={t.phone}
           type="tel"
           inputMode="tel"
@@ -54,6 +58,7 @@ export function StepContact({ errors }: { errors: ContactErrors }) {
           autoComplete="tel"
         />
         <TextField
+          maxLength={FIELD_LIMITS.maxPhone}
           label={t.whatsapp}
           type="tel"
           inputMode="tel"
@@ -61,6 +66,7 @@ export function StepContact({ errors }: { errors: ContactErrors }) {
           onChange={(e) => q.patchBuyer({ whatsapp: e.target.value })}
         />
         <TextField
+          maxLength={FIELD_LIMITS.maxEmail}
           label={t.email}
           type="email"
           inputMode="email"
@@ -71,6 +77,7 @@ export function StepContact({ errors }: { errors: ContactErrors }) {
           className="sm:col-span-2"
         />
         <TextArea
+          maxLength={FIELD_LIMITS.maxNotes}
           label={t.notes}
           rows={4}
           placeholder={t.notesPlaceholder}

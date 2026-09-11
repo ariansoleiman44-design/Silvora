@@ -322,6 +322,22 @@ export function QuoteWizard() {
                   <p className="mt-1 text-red-800/80">
                     {looksOffline ? t.failure.offline : (result?.error ?? t.failure.text)}
                   </p>
+                  {/*
+                    The server names the fields it refused. Those were
+                    parsed and then dropped, so a buyer whose notes ran
+                    over the limit saw only "we could not send this" with
+                    no way to work out which field or why. The inputs are
+                    capped now, so this should be unreachable through the
+                    form — but a rejection the buyer cannot act on is
+                    exactly the dead end worth keeping closed.
+                  */}
+                  {!looksOffline && result?.fields?.length ? (
+                    <ul className="mt-2 list-disc space-y-1 ps-5 text-red-800/80">
+                      {result.fields.map((f) => (
+                        <li key={`${f.field}-${f.message}`}>{f.message}</li>
+                      ))}
+                    </ul>
+                  ) : null}
                   <p className="mt-2 text-red-800/80">{t.failure.preserved}</p>
                 </div>
               </div>

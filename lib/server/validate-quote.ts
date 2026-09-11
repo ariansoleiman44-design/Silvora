@@ -1,3 +1,4 @@
+import { FIELD_LIMITS as LIMITS } from "../form-limits.ts";
 import type {
   CalculatorEstimate,
   ContactRequest,
@@ -41,15 +42,12 @@ export type ContactValidationResult =
 /* Limits                                                              */
 /* ------------------------------------------------------------------ */
 
-export const LIMITS = {
-  /** Rejected before parsing — see the route handler. */
-  maxBodyBytes: 128 * 1024,
-  maxItems: 50,
-  maxQuantity: 1_000_000,
-  maxNotes: 5_000,
-  maxShortText: 200,
-  maxEmail: 254,
-} as const;
+/**
+ * Re-exported from lib/form-limits.ts, which the browser forms also
+ * import. One set of numbers, so an input cannot let a buyer type
+ * something this validator will then refuse.
+ */
+export { FIELD_LIMITS as LIMITS } from "../form-limits.ts";
 
 const ORDER_KINDS: OrderKind[] = ["farm", "commercial", "distributor", "export"];
 const SUPPLY_MODES: SupplyMode[] = ["one-time", "recurring"];

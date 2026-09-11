@@ -11,6 +11,7 @@ import { useQuote } from "@/lib/quote-store";
 import { useCopy } from "@/lib/locale-client";
 import { formatNumber } from "@/lib/utils";
 import type { SupplyFrequency, SupplyMode } from "@/types/quote";
+import { FIELD_LIMITS } from "@/lib/form-limits";
 
 /**
  * Step 1 — the basket, upgraded into order lines: quantity, an optional
@@ -129,6 +130,7 @@ export function StepProducts() {
                     )}
                     {notesOpen && (
                       <TextArea
+          maxLength={FIELD_LIMITS.maxNotes}
                         label={t.notes}
                         rows={2}
                         value={item.notes ?? ""}
@@ -179,6 +181,7 @@ export function StepProducts() {
             />
             {q.request.frequency === "custom" && (
               <TextField
+          maxLength={FIELD_LIMITS.maxShortText}
                 label={t.frequencyCustom}
                 value={q.request.frequencyNote}
                 placeholder={t.frequencyCustomPlaceholder}
