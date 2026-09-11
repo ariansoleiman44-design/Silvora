@@ -3,7 +3,7 @@
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Search } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { siteConfig } from "@/data/site-config";
 import { isWhatsappConfigured, whatsappHref } from "@/lib/contact";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
 import { useDict } from "@/lib/locale-client";
 import { cn, pad2 } from "@/lib/utils";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 
 /**
  * Full-screen mobile navigation. Dark, editorial, thumb-friendly.
@@ -29,22 +30,32 @@ export function MobileMenu({
   const mainNav = useDict().nav.main;
   const reduce = useReducedMotion();
 
+  /*
+   * Tab cycling, initial focus and focus restoration. This declared
+   * role="dialog" aria-modal="true" and did none of them: Tab walked
+   * straight through into the page underneath, which is still rendered
+   * behind the full-screen panel.
+   *
+   * Escape is handled by the hook too, so the listener below only has
+   * to deal with the scroll lock.
+   */
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(open, panelRef, onClose);
+
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
-      document.removeEventListener("keydown", onKey);
     };
-  }, [open, onClose]);
+  }, [open]);
 
   return (
     <AnimatePresence>
       {open && (
         <m.div
+          ref={panelRef}
           id="mobile-menu"
           role="dialog"
           aria-modal="true"

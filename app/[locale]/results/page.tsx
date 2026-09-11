@@ -72,7 +72,7 @@ export default async function ResultsPage({
                 <RevealItem as="li" key={c.slug} className="bg-cream p-6 md:p-9">
                   <div className="flex items-baseline justify-between gap-4">
                     <p className="eyebrow text-gold">{pad2(i + 1)}</p>
-                    <p className="eyebrow text-ink/55">{c.location}</p>
+                    <p className="eyebrow text-ink/60">{c.location}</p>
                   </div>
 
                   {img && (
@@ -82,19 +82,19 @@ export default async function ResultsPage({
                   )}
 
                   <h2 className="display-sm mt-6">{c.operation}</h2>
-                  <p className="mt-2 text-sm uppercase tracking-[0.14em] text-ink/55">{c.herdSize}</p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.14em] text-ink/60">{c.herdSize}</p>
 
                   <dl className="mt-6 border-t border-ink/12">
                     <div className="border-b border-ink/12 py-4">
-                      <dt className="eyebrow text-ink/55">Challenge</dt>
+                      <dt className="eyebrow text-ink/60">Challenge</dt>
                       <dd className="mt-2 text-sm leading-relaxed text-ink/75">{c.challenge}</dd>
                     </div>
                     <div className="border-b border-ink/12 py-4">
-                      <dt className="eyebrow text-ink/55">Supply</dt>
+                      <dt className="eyebrow text-ink/60">Supply</dt>
                       <dd className="mt-2 text-sm leading-relaxed text-ink/75">{c.solution}</dd>
                     </div>
                     <div className="border-b border-ink/12 py-4">
-                      <dt className="eyebrow text-ink/55">Outcome</dt>
+                      <dt className="eyebrow text-ink/60">Outcome</dt>
                       <dd className="mt-2 text-sm leading-relaxed text-ink/75">{c.outcome}</dd>
                     </div>
                   </dl>
@@ -103,7 +103,7 @@ export default async function ResultsPage({
                     <dl className="mt-6 grid grid-cols-2 gap-6">
                       {c.metrics.map((m) => (
                         <div key={m.label}>
-                          <dt className="eyebrow text-ink/55">{m.label}</dt>
+                          <dt className="eyebrow text-ink/60">{m.label}</dt>
                           <dd className="mono-num mt-1 font-display text-3xl">{m.value}</dd>
                         </div>
                       ))}
@@ -111,7 +111,7 @@ export default async function ResultsPage({
                   )}
 
                   {c.productsUsed.length > 0 && (
-                    <p className="mt-6 text-xs uppercase tracking-[0.14em] text-ink/55">
+                    <p className="mt-6 text-xs uppercase tracking-[0.14em] text-ink/60">
                       {c.productsUsed
                         .map((slug) => getProduct(slug)?.name ?? slug)
                         .join(" · ")}

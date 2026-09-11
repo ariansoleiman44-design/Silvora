@@ -269,7 +269,7 @@ export function QuoteWizard() {
               <button
                 type="button"
                 onClick={q.dismissRestored}
-                className="eyebrow shrink-0 text-ink/50 hover:text-ink"
+                className="eyebrow shrink-0 text-ink/60 hover:text-ink"
               >
                 {t.saved.dismiss}
               </button>

@@ -70,7 +70,7 @@ export function QuoteProgress({
                 className={cn(
                   "flex w-full items-center gap-4 py-4 text-start transition-colors duration-300",
                   done && "cursor-pointer hover:text-ink",
-                  active ? "text-ink" : "text-ink/45",
+                  active ? "text-ink" : "text-ink/60",
                 )}
               >
                 <span
@@ -80,7 +80,7 @@ export function QuoteProgress({
                       ? "border-gold bg-gold text-ink"
                       : done
                         ? "border-ink/25 text-ink"
-                        : "border-ink/15 text-ink/40",
+                        : "border-ink/15 text-ink/60",
                   )}
                 >
                   {done ? <Check className="h-4 w-4" strokeWidth={2} aria-hidden /> : pad2(i + 1)}

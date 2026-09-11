@@ -75,7 +75,7 @@ export function ProductCard({ product, index, variant = "grid", priority, classN
       </Link>
 
       <div className="flex flex-1 flex-col pt-5">
-        {typeof index === "number" && <span className="eyebrow text-ink/45">{pad2(index + 1)}</span>}
+        {typeof index === "number" && <span className="eyebrow text-ink/60">{pad2(index + 1)}</span>}
 
         <Heading className={cn("display-sm", typeof index === "number" ? "mt-2.5" : "mt-0")}>
           <Link href={href} className="after:absolute after:inset-0 after:content-['']">
@@ -85,7 +85,7 @@ export function ProductCard({ product, index, variant = "grid", priority, classN
 
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink/60">{product.tagline}</p>
 
-        {facts && <p className="eyebrow mt-4 text-ink/50">{facts}</p>}
+        {facts && <p className="eyebrow mt-4 text-ink/60">{facts}</p>}
 
         {/* Full context, kept for assistive technology and crawlers. */}
         <dl className="sr-only">

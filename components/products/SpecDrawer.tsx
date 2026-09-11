@@ -60,12 +60,12 @@ export function SpecDrawer({
           <Button variant="ink" full icon="arrow" onClick={requestBatchData}>
             {hasLabReport(product) ? t.requestBatch : t.requestLab}
           </Button>
-          <p className="text-xs leading-relaxed text-ink/55">{t.requestBatchNote}</p>
+          <p className="text-xs leading-relaxed text-ink/60">{t.requestBatchNote}</p>
         </div>
       }
     >
       <div className="pb-2">
-        <p className="eyebrow text-ink/55">{product.category}</p>
+        <p className="eyebrow text-ink/60">{product.category}</p>
         <h3 className="display-xs mt-2">{product.name}</h3>
         <p className="mt-3 text-sm leading-relaxed text-ink/65">{t.specIntro}</p>
         <p className="mt-4 text-sm">
@@ -88,7 +88,7 @@ export function SpecDrawer({
                   <Download className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden />
                   <span className="flex-1 text-start">{d.label}</span>
                   {d.hint && (
-                    <span className="shrink-0 font-normal tracking-normal text-ink/45 normal-case">
+                    <span className="shrink-0 font-normal tracking-normal text-ink/60 normal-case">
                       {d.hint}
                     </span>
                   )}
@@ -109,7 +109,7 @@ export function SpecDrawer({
                     key={r.label}
                     className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-ink/10 py-2.5 last:border-b-0"
                   >
-                    <dt className="text-sm text-ink/55">{r.label}</dt>
+                    <dt className="text-sm text-ink/60">{r.label}</dt>
                     <dd className="text-end text-sm font-medium">
                       {r.value}
                       {r.demo && (
@@ -120,7 +120,7 @@ export function SpecDrawer({
                           {copy.common.demoLabel}
                         </span>
                       )}
-                      {r.note && <span className="mt-0.5 block text-xs font-normal text-ink/55">{r.note}</span>}
+                      {r.note && <span className="mt-0.5 block text-xs font-normal text-ink/60">{r.note}</span>}
                     </dd>
                   </div>
                 ))}

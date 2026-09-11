@@ -30,7 +30,7 @@ function ChapterRule({ numeral, title, note }: { numeral: string; title: string;
         {numeral}
       </span>
       <h3 className="eyebrow text-ink">{title}</h3>
-      <p className="text-sm text-ink/55 sm:ms-auto sm:text-end">{note}</p>
+      <p className="text-sm text-ink/60 sm:ms-auto sm:text-end">{note}</p>
     </Reveal>
   );
 }
@@ -125,7 +125,7 @@ export function ProcessWhy() {
               />
               <figcaption className="mt-3 flex items-center gap-3">
                 <span aria-hidden className="h-px w-6 bg-ink/40" />
-                <span className="eyebrow text-ink/55">{s.caption}</span>
+                <span className="eyebrow text-ink/60">{s.caption}</span>
               </figcaption>
             </div>
           </figure>

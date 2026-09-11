@@ -25,7 +25,7 @@ export function Seam({ index, label, bg, tone = "light", className }: SeamProps)
       <div className="container-x flex items-center gap-4 pt-10 md:gap-6 md:pt-14">
         <span className="mono-num eyebrow text-gold">{pad2(index)}</span>
         <span className={cn("h-px flex-1", dark ? "bg-cream/15" : "bg-ink/15")} />
-        <span className={cn("eyebrow truncate", dark ? "text-cream/55" : "text-ink/50")}>{label}</span>
+        <span className={cn("eyebrow truncate", dark ? "text-cream/55" : "text-ink/60")}>{label}</span>
       </div>
     </div>
   );

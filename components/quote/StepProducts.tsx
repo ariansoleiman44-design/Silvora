@@ -63,14 +63,14 @@ export function StepProducts() {
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="eyebrow text-ink/55">{item.format}</p>
+                        <p className="eyebrow text-ink/60">{item.format}</p>
                         <p className="mt-1 font-display text-xl leading-tight">{item.name}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
                         <Link
                           href={`/products/${item.slug}`}
                           aria-label={`${copy.rfq.edit} — ${item.name}`}
-                          className="grid h-10 w-10 place-items-center rounded-full text-ink/55 transition-colors hover:bg-ink/5 hover:text-ink"
+                          className="grid h-10 w-10 place-items-center rounded-full text-ink/60 transition-colors hover:bg-ink/5 hover:text-ink"
                         >
                           <Pencil className="h-4 w-4" strokeWidth={1.5} aria-hidden />
                         </Link>
@@ -78,7 +78,7 @@ export function StepProducts() {
                           type="button"
                           onClick={() => q.duplicateItem(item.uid)}
                           aria-label={`${t.duplicate} — ${item.name}`}
-                          className="grid h-10 w-10 place-items-center rounded-full text-ink/55 transition-colors hover:bg-ink/5 hover:text-ink"
+                          className="grid h-10 w-10 place-items-center rounded-full text-ink/60 transition-colors hover:bg-ink/5 hover:text-ink"
                         >
                           <Copy className="h-4 w-4" strokeWidth={1.5} aria-hidden />
                         </button>
@@ -86,7 +86,7 @@ export function StepProducts() {
                           type="button"
                           onClick={() => q.removeItem(item.uid)}
                           aria-label={`${t.remove} — ${item.name}`}
-                          className="grid h-10 w-10 place-items-center rounded-full text-ink/55 transition-colors hover:bg-ink/5 hover:text-ink"
+                          className="grid h-10 w-10 place-items-center rounded-full text-ink/60 transition-colors hover:bg-ink/5 hover:text-ink"
                         >
                           <Trash2 className="h-4 w-4" strokeWidth={1.5} aria-hidden />
                         </button>
@@ -100,7 +100,7 @@ export function StepProducts() {
                         size="sm"
                         label={`${copy.common.quantity} — ${item.name}`}
                       />
-                      <span className="text-xs text-ink/55">{copy.common.bales}</span>
+                      <span className="text-xs text-ink/60">{copy.common.bales}</span>
                       {!notesOpen && (
                         <button
                           type="button"

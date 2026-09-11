@@ -45,7 +45,7 @@ export function BatchInformation({
               className={cn("border p-4", dark ? "border-cream/12" : "border-ink/12")}
             >
               <div className="flex flex-wrap items-baseline justify-between gap-3">
-                <p className={cn("eyebrow", dark ? "text-cream/60" : "text-ink/55")}>{t.batchCode}</p>
+                <p className={cn("eyebrow", dark ? "text-cream/60" : "text-ink/60")}>{t.batchCode}</p>
                 <p className="mono-num font-display text-lg">
                   {batch.code}
                   {batch.demo && (
@@ -67,7 +67,7 @@ export function BatchInformation({
                       dark ? "border-cream/10" : "border-ink/10",
                     )}
                   >
-                    <dt className={cn("text-sm", dark ? "text-cream/60" : "text-ink/55")}>{r.label}</dt>
+                    <dt className={cn("text-sm", dark ? "text-cream/60" : "text-ink/60")}>{r.label}</dt>
                     <dd className="text-sm font-medium">{r.value}</dd>
                   </div>
                 ))}
@@ -77,7 +77,7 @@ export function BatchInformation({
                   as a product-wide nutritional profile. */}
               {batchNutritionRows(batch).length > 0 && (
                 <>
-                  <p className={cn("eyebrow mt-4", dark ? "text-cream/60" : "text-ink/55")}>
+                  <p className={cn("eyebrow mt-4", dark ? "text-cream/60" : "text-ink/60")}>
                     {t.batchNutrition}
                   </p>
                   <dl className="mt-2">
@@ -89,10 +89,10 @@ export function BatchInformation({
                           dark ? "border-cream/10" : "border-ink/10",
                         )}
                       >
-                        <dt className={cn("text-sm", dark ? "text-cream/60" : "text-ink/55")}>
+                        <dt className={cn("text-sm", dark ? "text-cream/60" : "text-ink/60")}>
                           {r.label}
                           {r.note && (
-                            <span className={cn("ms-2 text-xs", dark ? "text-cream/40" : "text-ink/40")}>
+                            <span className={cn("ms-2 text-xs", dark ? "text-cream/40" : "text-ink/60")}>
                               {r.note}
                             </span>
                           )}

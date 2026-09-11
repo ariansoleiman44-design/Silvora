@@ -2,9 +2,10 @@
 
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useCopy, useDir } from "@/lib/locale-client";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 import { useIsTablet } from "@/lib/hooks";
 
 /**
@@ -26,9 +27,6 @@ interface DrawerProps {
   labelledBy?: string;
 }
 
-const FOCUSABLE =
-  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
-
 export function Drawer({
   open,
   onClose,
@@ -43,62 +41,11 @@ export function Drawer({
   const copy = useCopy();
   const dir = useDir();
   const panelRef = useRef<HTMLDivElement>(null);
-  const lastActive = useRef<HTMLElement | null>(null);
   const reduce = useReducedMotion();
 
-  /*
-   * Held in a ref so the focus effect below does not depend on it.
-   *
-   * Both callers pass a new function on every render — ProductCatalog
-   * an inline arrow, QuoteDrawer a `q.close` rebuilt whenever `items`
-   * changes. With `onClose` in the dependency array, the effect tore
-   * itself down and re-ran on every keystroke inside the drawer: the
-   * cleanup focused the trigger BEHIND the backdrop, then the body
-   * focused the panel's close button.
-   *
-   * The visible symptom was that a multi-digit quantity could not be
-   * typed in the quote basket at all — type "4", the store updates,
-   * focus jumps to the X, and the "0" goes nowhere. Keyboard users
-   * also lost their place on every filter toggle.
-   */
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
-  useEffect(() => {
-    if (!open) return;
-    lastActive.current = document.activeElement as HTMLElement;
-    const panel = panelRef.current;
-    const first = panel?.querySelector<HTMLElement>(FOCUSABLE);
-    (first ?? panel)?.focus({ preventScroll: true });
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCloseRef.current();
-      if (e.key === "Tab" && panel) {
-        const nodes = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-          (n) => n.offsetParent !== null,
-        );
-        if (nodes.length === 0) return;
-        const firstNode = nodes[0]!;
-        const lastNode = nodes[nodes.length - 1]!;
-        if (e.shiftKey && document.activeElement === firstNode) {
-          e.preventDefault();
-          lastNode.focus();
-        } else if (!e.shiftKey && document.activeElement === lastNode) {
-          e.preventDefault();
-          firstNode.focus();
-        }
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      lastActive.current?.focus?.({ preventScroll: true });
-    };
-    // `open` only: this must run once per open/close transition, never
-    // on a re-render. See the note on onCloseRef above.
-  }, [open]);
+  // Shared with the search dialog and the mobile menu — see
+  // lib/use-focus-trap.ts for why onClose is held in a ref.
+  useFocusTrap(open, panelRef, onClose);
 
   const isDark = tone === "dark";
   const isFull = mobile === "full";

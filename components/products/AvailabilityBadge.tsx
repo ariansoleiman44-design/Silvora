@@ -47,7 +47,7 @@ export function AvailabilityBadge({
         {availabilityLabels[product.availability]}
       </span>
       {product.availabilityNote && (
-        <span className={tone === "dark" ? "text-cream/60" : "text-ink/55"}>
+        <span className={tone === "dark" ? "text-cream/60" : "text-ink/60"}>
           · {product.availabilityNote}
         </span>
       )}

@@ -109,9 +109,24 @@
     color: var(--color-ink);
   }
 
+  /*
+   * TWO-TONE FOCUS RING, and it has to be.
+   *
+   * The ring was gold alone, which measures 2.08:1 on cream — below the
+   * 3:1 WCAG 2.2 minimum for a focus indicator. Gold reads well on the
+   * dark sections (8.15:1 on ink, 6.51:1 on forest) and almost
+   * disappears on the light ones, so no single colour works across this
+   * palette.
+   *
+   * Pairing a dark outline with a gold halo means one half is always
+   * visible: ink carries it on cream (16.96:1), gold carries it on ink
+   * and forest. Nothing needs to know which surface it is on.
+   */
   :focus-visible {
-    outline: 2px solid var(--color-gold);
-    outline-offset: 3px;
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--color-gold);
+    border-radius: 2px;
   }
 
   img, video { display: block; }

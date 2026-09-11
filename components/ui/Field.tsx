@@ -195,6 +195,18 @@ export function ChoiceGroup({
               htmlFor={optId}
               className={cn(
                 "flex min-h-14 cursor-pointer flex-col justify-center rounded-[2px] border px-4 py-3 transition-colors duration-300",
+                /*
+                 * The radio itself is sr-only, so focus landed on an
+                 * invisible element and these tiles — the wizard's main
+                 * controls — showed nothing at all to a keyboard user.
+                 *
+                 * `has-[:focus-visible]` rather than `peer-*` because
+                 * the input is a CHILD of this label, not a sibling.
+                 * The ring is the same two-tone pair as the global one
+                 * in globals.css, so it stays visible on the cream
+                 * tiles and the ink ones alike.
+                 */
+                "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink has-[:focus-visible]:shadow-[0_0_0_4px_var(--color-gold)]",
                 tone === "dark"
                   ? active
                     ? "border-gold bg-gold/10 text-cream"

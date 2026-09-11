@@ -21,7 +21,7 @@ function Row({ label, value }: { label: string; value?: ReactNode }) {
   if (value === undefined || value === null || value === "" || value === false) return null;
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-ink/10 py-2.5 last:border-b-0">
-      <dt className="text-sm text-ink/55">{label}</dt>
+      <dt className="text-sm text-ink/60">{label}</dt>
       <dd className="text-sm font-medium text-ink">{value}</dd>
     </div>
   );
@@ -99,7 +99,7 @@ export function StepReview({
         <div className="grid gap-8">
           <Section title={t.products} editLabel={copy.rfq.edit} onEdit={() => onEditStep(0)}>
             {request.products.length === 0 ? (
-              <p className="text-sm text-ink/55">{t.noProducts}</p>
+              <p className="text-sm text-ink/60">{t.noProducts}</p>
             ) : (
               <ul className="border-b border-ink/10">
                 {request.products.map((i) => (
@@ -109,7 +109,7 @@ export function StepReview({
                   >
                     <div className="min-w-0">
                       <p className="font-display text-lg leading-tight">{i.name}</p>
-                      <p className="mt-0.5 text-xs uppercase tracking-[0.14em] text-ink/55">
+                      <p className="mt-0.5 text-xs uppercase tracking-[0.14em] text-ink/60">
                         {i.format}
                         {i.frequency ? ` · ${frequencyLabels[i.frequency]}` : ""}
                       </p>
@@ -117,7 +117,7 @@ export function StepReview({
                     </div>
                     <p className="mono-num font-display text-xl">
                       {formatNumber(i.quantity)}{" "}
-                      <span className="text-xs uppercase tracking-[0.14em] text-ink/55">
+                      <span className="text-xs uppercase tracking-[0.14em] text-ink/60">
                         {copy.common.bales}
                       </span>
                     </p>
@@ -176,7 +176,7 @@ export function StepReview({
                 <Row label="Total requirement" value={formatTonnes(est.totalKg)} />
                 <Row label="Bales incl. reserve" value={formatNumber(est.balesWithReserve)} />
               </dl>
-              <p className="mt-3 text-xs leading-relaxed text-ink/55">{copy.calculator.disclaimer}</p>
+              <p className="mt-3 text-xs leading-relaxed text-ink/60">{copy.calculator.disclaimer}</p>
             </Section>
           )}
 
@@ -196,7 +196,7 @@ export function StepReview({
             </Section>
           )}
 
-          <p className="border-t border-ink/20 pt-4 text-xs leading-relaxed text-ink/55">
+          <p className="border-t border-ink/20 pt-4 text-xs leading-relaxed text-ink/60">
             {copy.rfq.products.pricingText}
           </p>
         </div>

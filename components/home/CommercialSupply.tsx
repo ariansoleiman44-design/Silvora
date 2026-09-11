@@ -33,7 +33,7 @@ export function CommercialSupply({ className, tone = "light" }: { className?: st
               <p className={cn("body-lg max-w-sm", dark ? "text-cream/70" : "text-ink/65")}>{t.intro}</p>
             </Reveal>
             <Reveal delay={0.15}>
-              <ul className={cn("mt-5 flex flex-wrap gap-x-5 gap-y-1.5 text-xs uppercase tracking-[0.14em]", dark ? "text-cream/55" : "text-ink/55")}>
+              <ul className={cn("mt-5 flex flex-wrap gap-x-5 gap-y-1.5 text-xs uppercase tracking-[0.14em]", dark ? "text-cream/55" : "text-ink/60")}>
                 {t.audience.map((a) => (
                   <li key={a}>{a}</li>
                 ))}

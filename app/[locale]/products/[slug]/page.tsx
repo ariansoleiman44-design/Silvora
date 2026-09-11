@@ -134,7 +134,7 @@ export default async function ProductPage({ params }: Params) {
         <section className="bg-cream-deep py-14 text-ink md:py-20">
           <div className="container-x max-w-3xl">
             <BatchInformation product={product} />
-            <p className="mt-4 text-xs leading-relaxed text-ink/55">{copy.product.batchIntro}</p>
+            <p className="mt-4 text-xs leading-relaxed text-ink/60">{copy.product.batchIntro}</p>
           </div>
         </section>
       )}
