@@ -364,6 +364,10 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const openDrawer = useCallback(() => setOpen(true), []);
+  const closeDrawer = useCallback(() => setOpen(false), []);
+  const toggleDrawer = useCallback(() => setOpen((v) => !v), []);
+
   const ensureReference = useCallback(() => {
     if (request.reference) return request.reference;
     const next = createReference();
@@ -382,9 +386,17 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
       restored: restored && !restoredDismissed,
       dismissRestored: () => setRestoredDismissed(true),
       isOpen,
-      open: () => setOpen(true),
-      close: () => setOpen(false),
-      toggle: () => setOpen((v) => !v),
+      /*
+       * Stable identities. These are passed straight to <Drawer
+       * onClose>, and rebuilding them on every items change made the
+       * drawer's focus effect tear down and re-run mid-interaction —
+       * which is why a multi-digit quantity could not be typed. The
+       * drawer no longer depends on the identity, but there is no
+       * reason to hand out a new function on every keystroke either.
+       */
+      open: openDrawer,
+      close: closeDrawer,
+      toggle: toggleDrawer,
       addProduct,
       duplicateItem: (itemUid) => dispatch({ type: "duplicate", itemUid }),
       setQuantity: (itemUid, quantity) => dispatch({ type: "setQuantity", itemUid, quantity }),
@@ -408,7 +420,7 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
       has: (productId) => items.some((i) => i.productId === productId),
       lastAddedId,
     }),
-    [items, request, saved, hydrated, restored, restoredDismissed, isOpen, addProduct, ensureReference, lastAddedId],
+    [items, request, saved, hydrated, restored, restoredDismissed, isOpen, addProduct, ensureReference, lastAddedId, openDrawer, closeDrawer, toggleDrawer],
   );
 
   return <QuoteContext.Provider value={value}>{children}</QuoteContext.Provider>;

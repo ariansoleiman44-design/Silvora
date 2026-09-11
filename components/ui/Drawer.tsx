@@ -45,6 +45,26 @@ export function Drawer({
   const lastActive = useRef<HTMLElement | null>(null);
   const reduce = useReducedMotion();
 
+  /*
+   * Held in a ref so the focus effect below does not depend on it.
+   *
+   * Both callers pass a new function on every render — ProductCatalog
+   * an inline arrow, QuoteDrawer a `q.close` rebuilt whenever `items`
+   * changes. With `onClose` in the dependency array, the effect tore
+   * itself down and re-ran on every keystroke inside the drawer: the
+   * cleanup focused the trigger BEHIND the backdrop, then the body
+   * focused the panel's close button.
+   *
+   * The visible symptom was that a multi-digit quantity could not be
+   * typed in the quote basket at all — type "4", the store updates,
+   * focus jumps to the X, and the "0" goes nowhere. Keyboard users
+   * also lost their place on every filter toggle.
+   */
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
     lastActive.current = document.activeElement as HTMLElement;
@@ -53,7 +73,7 @@ export function Drawer({
     (first ?? panel)?.focus({ preventScroll: true });
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
       if (e.key === "Tab" && panel) {
         const nodes = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
           (n) => n.offsetParent !== null,
@@ -75,7 +95,9 @@ export function Drawer({
       document.removeEventListener("keydown", onKey);
       lastActive.current?.focus?.({ preventScroll: true });
     };
-  }, [open, onClose]);
+    // `open` only: this must run once per open/close transition, never
+    // on a re-render. See the note on onCloseRef above.
+  }, [open]);
 
   const isDark = tone === "dark";
   const isFull = mobile === "full";

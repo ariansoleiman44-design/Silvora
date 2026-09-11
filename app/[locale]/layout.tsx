@@ -178,6 +178,26 @@ export default async function LocaleLayout({
           to /public — see data/media.ts.
         */}
         <link rel="preconnect" href={remoteImageOrigin} crossOrigin="anonymous" />
+        {/*
+          Scroll reveals (components/ui/Reveal.tsx) start hidden, and
+          Framer serialises that into the server HTML as an inline
+          style. Without JavaScript nothing ever reveals them, so whole
+          sections of the page would stay permanently invisible rather
+          than merely un-animated.
+
+          The page above the fold no longer depends on JS at all — see
+          template.tsx — and this makes the rest degrade the same way:
+          no animation, but everything readable.
+        */}
+        <noscript>
+          {/* eslint-disable-next-line react/no-danger */}
+          <style
+            dangerouslySetInnerHTML={{
+              __html:
+                '[style*="opacity:0"]{opacity:1!important}[style*="translateY"],[style*="translateX"]{transform:none!important}',
+            }}
+          />
+        </noscript>
       </head>
       <body>
         <LocaleProvider locale={locale} dir={meta.dir} dict={dict}>
