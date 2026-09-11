@@ -10,7 +10,7 @@ import { Reveal, RevealLines } from "@/components/ui/Reveal";
 import { useQuote } from "@/lib/quote-store";
 
 import { track } from "@/lib/analytics";
-import { useCopy } from "@/lib/locale-client";
+import { useCopy, useLocalePath } from "@/lib/locale-client";
 import type { OrderKind } from "@/types/quote";
 
 /**
@@ -30,6 +30,9 @@ export function DeliveryPlanner() {
   const t = copy.deliveryPlanner;
   const q = useQuote();
   const router = useRouter();
+  // /quote must keep the visitor in their language — a bare push
+  // sent Arabic and Kurdish buyers into the English wizard.
+  const withLocale = useLocalePath();
   const [added, setAdded] = useState(false);
   const d = q.request.delivery;
 
@@ -41,7 +44,7 @@ export function DeliveryPlanner() {
     // No location string: a region plus a timestamp identifies a buyer.
     track("delivery_planner_completed", { orderType: q.request.orderType });
     setAdded(true);
-    router.push("/quote");
+    router.push(withLocale("/quote"));
   };
 
   return (

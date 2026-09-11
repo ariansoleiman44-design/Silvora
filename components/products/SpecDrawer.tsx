@@ -10,7 +10,7 @@ import { buildSpecSections, hasLabReport, productDownloads } from "@/lib/spec-sh
 import { externalLinkRel } from "@/lib/url-safety";
 import { useQuote } from "@/lib/quote-store";
 import { track } from "@/lib/analytics";
-import { useCopy } from "@/lib/locale-client";
+import { useCopy, useLocalePath } from "@/lib/locale-client";
 import type { Product } from "@/types/product";
 
 /**
@@ -35,6 +35,9 @@ export function SpecDrawer({
   const t = copy.product;
   const q = useQuote();
   const router = useRouter();
+  // /quote must keep the visitor in their language — a bare push
+  // sent Arabic and Kurdish buyers into the English wizard.
+  const withLocale = useLocalePath();
   const sections = buildSpecSections(product);
   const downloads = productDownloads(product);
 
@@ -43,7 +46,7 @@ export function SpecDrawer({
     q.patchRequirements({ labDataRequested: true });
     track("spec_request", { product: product.slug });
     onClose();
-    router.push("/quote");
+    router.push(withLocale("/quote"));
   };
 
   return (

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { media, type MediaKey } from "@/data/media";
-import { scrollOffset } from "@/lib/rtl";
+import { scrollOffset, scrollToOffset } from "@/lib/rtl";
 import { useCopy } from "@/lib/locale-client";
 import { cn, pad2 } from "@/lib/utils";
 
@@ -44,7 +44,14 @@ export function ProductGallery({ images, name }: { images: MediaKey[]; name: str
   const goTo = (i: number) => {
     setIndex(i);
     const el = trackRef.current;
-    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: reduce ? "auto" : "smooth" });
+    // scrollTo takes a PHYSICAL offset, which is negative in RTL — a
+    // positive value is clamped to 0, so every dot jumped to slide one.
+    if (el) {
+      el.scrollTo({
+        left: scrollToOffset(el, i * el.clientWidth),
+        behavior: reduce ? "auto" : "smooth",
+      });
+    }
   };
 
   const active = assets[index] ?? assets[0];

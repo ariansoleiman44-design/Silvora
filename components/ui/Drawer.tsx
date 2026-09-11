@@ -4,7 +4,7 @@ import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { useCopy } from "@/lib/locale-client";
+import { useCopy, useDir } from "@/lib/locale-client";
 import { useIsTablet } from "@/lib/hooks";
 
 /**
@@ -41,6 +41,7 @@ export function Drawer({
   widthClassName = "md:max-w-[30rem]",
 }: DrawerProps) {
   const copy = useCopy();
+  const dir = useDir();
   const panelRef = useRef<HTMLDivElement>(null);
   const lastActive = useRef<HTMLElement | null>(null);
   const reduce = useReducedMotion();
@@ -103,8 +104,17 @@ export function Drawer({
   const isFull = mobile === "full";
   const isTablet = useIsTablet();
 
+  /*
+   * `side` is LOGICAL ("end" means the reading-end of the line), but the
+   * x offset here is PHYSICAL. In RTL the end edge is on the left, so a
+   * hardcoded "100%" slid the panel in from the wrong side — it left
+   * from the right while the CSS placed it on the left, so it flew
+   * across the page.
+   */
+  const away = (side === "end") === (dir === "ltr") ? "100%" : "-100%";
+
   const hidden = isTablet
-    ? { x: side === "end" ? "100%" : "-100%", y: 0 }
+    ? { x: away, y: 0 }
     : { x: 0, y: "100%" };
 
   return (

@@ -38,3 +38,17 @@ export function scrollDelta(el: HTMLElement, direction: 1 | -1, distance: number
   const rtl = getComputedStyle(el).direction === "rtl";
   return (rtl ? -direction : direction) * distance;
 }
+
+/**
+ * Convert a logical offset from the START edge into the physical
+ * `scrollLeft` value this element expects.
+ *
+ * `scrollTo({ left })` takes the physical value, which in RTL is
+ * negative. Passing a positive one is silently clamped to 0, so every
+ * jump landed back on the first slide — the gallery's dot navigation
+ * did nothing at all in Arabic, Sorani and Badini.
+ */
+export function scrollToOffset(el: HTMLElement, offset: number): number {
+  const rtl = getComputedStyle(el).direction === "rtl";
+  return rtl ? -offset : offset;
+}
